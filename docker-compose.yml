@@ -1,0 +1,21 @@
+version: '3.0'
+services: 
+  backend: 
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: cargo run
+    ports: 
+    - "8080:8080"
+    volumes: 
+    - ./server:/usr/src/app 
+    - ./server/registry:/root/.cargo/registry
+
+volumes:
+  registry:
+    driver: local
+
+#Todo : 
+#Configure Node in docker
+#Configure DB for Rust app (for clients and all)
+#Condifure networks properly

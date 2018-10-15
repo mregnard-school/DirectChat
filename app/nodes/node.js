@@ -1,12 +1,11 @@
 const net = require('net');
-const clients = require('../services/mock').clients;
 
 class Node {
-  constructor() {
-    this.client = clients[0];
+  constructor(client, port) {
+    this.client = client;
     this.sockets = [];
     
-    this.initializeServer(5000); // TODO irindul 2018-10-15 : Don't hardcode it
+    this.initializeServer(port);
   }
   
   initializeServer(port) {

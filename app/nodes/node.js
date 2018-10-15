@@ -1,14 +1,12 @@
 const net = require('net');
 
 class Node {
-  constructor(client, port) {
+  constructor(client) {
     this.client = client;
     this.sockets = [];
-    
-    this.initializeServer(port);
   }
   
-  initializeServer(port) {
+  runServer(port) {
     net.createServer((socket) => {
       this.onConnection(socket);
       

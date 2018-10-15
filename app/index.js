@@ -1,1 +1,2 @@
-console.log("Hello world");
+const test = require("./services/tests/axiosMock");
+test.testAxiosMockGet();

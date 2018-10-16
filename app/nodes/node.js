@@ -1,8 +1,7 @@
 const net = require('net');
 const chain = require('./middlewares/');
-
-const ServerConnectionHandler = require('./network/connectionHandler').Server;
-const ClientConnectionHandler = require('./network/connectionHandler').Client;
+const ServerHandler = require('./network/connectionHandler').Server;
+const ClientHandler = require('./network/connectionHandler').Client;
 
 class Node {
   constructor(client) {
@@ -10,27 +9,43 @@ class Node {
     this.sockets = []; //Maybe change this with hashmap client/socket
     this.serverSocket = undefined;
     this.middleWareChain = chain;
-    
+    this.onReceivedData = () => {};
+    this.onEndConnection = () => {};
   }
   
-  //Server-side code
+  setOnReceiveData(onReceiveData) {
+    this.setOnReceiveData = onReceiveData;
+    return this;
+  }
+  
+  setOnEndConnection(onEndConnection) {
+    this.setOnEndConnection(onEndConnection);
+  }
+  
   runServer(port) {
     this.serverSocket = net.createServer((socket) => {
       this.sockets.push(socket);
-      const serverConnectionHandler = new ServerConnectionHandler(socket, this.client);
-      serverConnectionHandler
-          .setOnReceiveData(this.onReceivedData)
-          .setOnConnectionClose(this.onEndConnection)
-          .setOnError((error) => console.log(error))
-          .handleOnConnection();
+      const serverConnectionHandler = new ServerHandler(socket,
+          this.client);
+      this.iniitializeConnectionHandler(serverConnectionHandler);
     });
     
     this.serverSocket.listen(port);
   }
   
-  onReceivedData(socket, data) {}
-  
-  onEndConnection(socket) {}
+  iniitializeConnectionHandler(handler, resolve, reject) {
+    handler.setOnReceiveData(this.onReceivedData)
+        .setOnConnectionClose(this.onEndConnection)
+        .setOnError((error) => {
+          if(reject) {
+            reject(error);
+          }
+          else {
+            console.error(error);
+          }
+        })
+        .handleOnConnection(resolve);
+  }
   
   closeServer() {
     this.sockets.forEach(socket => {
@@ -41,20 +56,13 @@ class Node {
   
   connectTo(ip, port) {
     const clientSocket = new net.Socket();
-    let self = this;
-    let promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       clientSocket.connect(port, ip, () => {
         this.sockets.push(clientSocket);
-        const handler = new ClientConnectionHandler(clientSocket, this.client);
-        handler
-            .setOnReceiveData(this.onReceivedData)
-            .setOnConnectionClose(this.onEndConnection)
-            .setOnError((error) => { reject(error)})
-            .handleOnConnection(resolve);
+        const handler = new ClientHandler(clientSocket, this.client);
+        this.iniitializeConnectionHandler(handler, resolve, reject);
       });
     });
-    
-    return promise;
   }
   
   writeMessageTo(client, message) {

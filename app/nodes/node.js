@@ -1,74 +1,31 @@
 const net = require('net');
 const chain = require('./middlewares/');
 
-const handshakeInfo = 'handshake ';
+const ServerConnectionHandler = require('./network/serverConnectionHandler');
+const ClientConnectionHandler = require('./network/clientConnectionHandler');
 
 class Node {
   constructor(client) {
     this.client = client;
-    this.sockets = [];
+    this.sockets = []; //Maybe change this with hashmap client/socket
     this.serverSocket = undefined;
     this.middleWareChain = chain;
+    
   }
   
   //Server-side code
   runServer(port) {
     this.serverSocket = net.createServer((socket) => {
-      this.onConnection(socket);
-      this.setupListeners(socket);
+      this.sockets.push(socket);
+      const serverConnectionHandler = new ServerConnectionHandler(socket, this.client);
+      serverConnectionHandler
+          .setOnReceiveData(this.onReceivedData)
+          .setOnConnectionClose(this.onEndConnection)
+          .setOnError((error) => console.log(error))
+          .handleOnConnection();
     });
     
     this.serverSocket.listen(port);
-  }
-  
-  onConnection(socket, isClient) {
-    this.sockets.push(socket);
-    socket.setEncoding('utf8');
-    if(isClient) {
-      this.sendHandShakeClientSide(socket);
-    }
-  }
-  
-  setupListeners(socket) {
-    socket.on('data', (data) => {
-      this.handleData(socket, data);
-    });
-    
-    socket.on('end', () => {
-      this.onEndConnection(socket);
-    })
-  }
-  
-  handleData(socket, data, isClient, callback) {
-    if (data.includes(handshakeInfo)) { // TODO irindul 2018-10-15 : Add boolean to ensure we handshake once
-      if(isClient) {
-        this.parseHandshakeClientSide(socket, data);
-        callback();
-      } else {
-        this.parseAndSendHandShakeServerSide(socket, data);
-      }
-    } else {
-      this.onReceivedData(socket, data);
-    }
-  }
-  
-  parseAndSendHandShakeServerSide(socket, data) {
-    socket.client = this.parseClientFromHandshake(data);
-    socket.write(this.buildHandshakeMessage());
-  }
-  
-  parseClientFromHandshake(data) {
-    let parts = data.split(' ');
-    let id = Number(parts[1]);
-    let pseudo = parts[2];
-    return {
-      "id": id,
-      "pseudo": pseudo,
-    };
-  }
-  
-  buildHandshakeMessage() {
-    return handshakeInfo + this.client.id + ' ' + this.client.pseudo;
   }
   
   onReceivedData(socket, data) {}
@@ -87,28 +44,17 @@ class Node {
     let self = this;
     let promise = new Promise((resolve, reject) => {
       clientSocket.connect(port, ip, () => {
-        this.onConnection(clientSocket, true);
-      });
-      
-      clientSocket.on('data', (data) => {
-        data = data.toString(); //Is Byte buffer otherwise;
-        this.handleData(clientSocket, data, true, resolve);
-        //this.onReceivedData(clientSocket, data);
-      });
-      
-      clientSocket.on('close', function () {
-      });
-      
-      clientSocket.on('error', (error) => {
-        reject(error);
+        this.sockets.push(clientSocket);
+        const handler = new ClientConnectionHandler(clientSocket, this.client);
+        handler
+            .setOnReceiveData(this.onReceivedData)
+            .setOnConnectionClose(this.onEndConnection)
+            .setOnError((error) => { reject(error)})
+            .handleOnConnection(resolve);
       });
     });
     
     return promise;
-  }
-  
-  parseHandshakeClientSide(socket, data) {
-    socket.client = this.parseClientFromHandshake(data);
   }
   
   writeMessageTo(client, message) {
@@ -132,10 +78,6 @@ class Node {
     }
     
     return socketsAssociated;
-  }
-  
-  sendHandShakeClientSide(socket) {
-    socket.write(this.buildHandshakeMessage());
   }
 }
 

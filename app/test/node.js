@@ -41,13 +41,6 @@ describe("Node", () => {
     )
   });
   
-  it("should parse handshake", (done) => {
-    const nodeServer = new Node(clients[0]);
-    let client = nodeServer.parseClientFromHandshake('handshake 1 John');
-    expect(client).to.be.deep.equal({id: 1, pseudo: "John"});
-    done();
-  });
-  
   it("should return the socket for associated client", (done) => {
     const nodeServer = new Node(clients[0]);
     nodeServer.runServer(5000);

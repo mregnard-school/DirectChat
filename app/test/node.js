@@ -43,7 +43,7 @@ describe("Node", () => {
   
   it("should parse handshake", (done) => {
     const nodeServer = new Node(clients[0]);
-    let client = nodeServer.parseHandshake('handshake 1 John');
+    let client = nodeServer.parseClientFromHandshake('handshake 1 John');
     expect(client).to.be.deep.equal({id: 1, pseudo: "John"});
     done();
   });

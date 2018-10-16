@@ -42,4 +42,25 @@ class HandshakeHandler {
   }
 }
 
-module.exports = HandshakeHandler;
+class Client extends HandshakeHandler {
+  constructor(socket, client) {
+    super(socket, client);
+  }
+}
+
+class Server extends HandshakeHandler {
+  constructor(socket, client) {
+    super(socket, client);
+    
+  }
+  
+  handleHandshake(data) {
+    super.handleHandshake(data);
+    this.writeHandshake();
+  }
+}
+
+module.exports = {
+  Server,
+  Client,
+};

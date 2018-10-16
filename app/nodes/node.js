@@ -1,8 +1,8 @@
 const net = require('net');
 const chain = require('./middlewares/');
 
-const ServerConnectionHandler = require('./network/serverConnectionHandler');
-const ClientConnectionHandler = require('./network/clientConnectionHandler');
+const ServerConnectionHandler = require('./network/connectionHandler').Server;
+const ClientConnectionHandler = require('./network/connectionHandler').Client;
 
 class Node {
   constructor(client) {

@@ -1,4 +1,5 @@
-const Server = require('./server');
+const ClientHandshake = require('./handshakeHandler').Client;
+const ServerHandshake = require('./handshakeHandler').Server;
 
 class ConnectionHandler {
   constructor(socket, client) {
@@ -47,4 +48,34 @@ class ConnectionHandler {
   }
 }
 
-module.exports = ConnectionHandler;
+class Server extends ConnectionHandler {
+  constructor(socket, client) {
+    super(socket, client);
+    this.handshakeHandler = new ServerHandshake(socket, client);
+  }
+  
+  getHandshakeHandler() {
+    return this.handshakeHandler
+  }
+}
+
+class Client extends ConnectionHandler {
+  constructor(socket, client) {
+    super(socket, client);
+    this.handshakeHandler = new ClientHandshake(socket, client);
+  }
+  
+  handleOnConnection(resolve) {
+    super.handleOnConnection(resolve);
+    this.handshakeHandler.writeHandshake();
+  }
+  
+  getHandshakeHandler() {
+    return this.handshakeHandler;
+  }
+}
+
+module.exports = {
+  Server,
+  Client,
+};

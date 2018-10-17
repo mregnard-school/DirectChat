@@ -9,5 +9,7 @@ EXPOSE 8000
 RUN rustup default nightly \
     && rustup update \
     && cargo update \
+    && cargo install diesel_cli \
+    && diesel migration run \
     && cargo build
 CMD ["cargo", "run"]

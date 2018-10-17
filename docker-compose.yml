@@ -6,33 +6,31 @@ services:
       context: ./server
       dockerfile: Dockerfile
     command: cargo run
-    links:
+    depends_on:
         - db
     ports:
-    - "8000:8000"
+      - 8000:80
     volumes:
     - ./server:/usr/src/app
     - ./server/registry:/root/.cargo/registry
     env_file: server/.env
     networks:
-        - test
+        - app
   db:
     image: mysql:5.7
     ports:
       - "3306:3306"
     container_name: "db"
+    networks:
+        - app
     environment:
       MYSQL_DATABASE: client
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_USER: root
       MYSQL_PASSWORD: secret
 
-
 networks:
-  test:
+  app:
       driver: bridge
-
 #Todo :
 #Configure Node in docker
-#Configure DB for Rust app (for clients and all)
-#Condifure networks properly

@@ -4,7 +4,7 @@ FROM rust:latest
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY . .
-EXPOSE 8000
+EXPOSE 80
 #running config
 RUN rustup default nightly \
     && rustup update \

@@ -1,21 +1,32 @@
 version: '3.0'
-services: 
-  backend: 
+services:
+  backend:
     build:
       context: ./server
       dockerfile: Dockerfile
     command: cargo run
-    ports: 
-    - "8080:8080"
-    volumes: 
-    - ./server:/usr/src/app 
+    ports:
+    - "8000:8000"
+    volumes:
+    - ./server:/usr/src/app
     - ./server/registry:/root/.cargo/registry
+  db:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    container_name: "db"
+    environment:
+      - MYSQL_DATABASE=p2p
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=MYSQL_ROOT_PASSWORD
+
 
 volumes:
   registry:
     driver: local
 
-#Todo : 
+#Todo :
 #Configure Node in docker
 #Configure DB for Rust app (for clients and all)
 #Condifure networks properly

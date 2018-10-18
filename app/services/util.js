@@ -1,5 +1,6 @@
 function HashTable() {
   this.map = {};
+  this.count = 0;
 }
 
 HashTable.prototype = {
@@ -10,6 +11,7 @@ HashTable.prototype = {
     }
     
     this.map[key.id] = value;
+    this.count++;
   },
   get: function(key) {
     return this.map[key.id];

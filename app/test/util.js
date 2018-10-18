@@ -64,4 +64,18 @@ describe('Utility methods', () => {
     expect(spy.getCall(1).args[0] == key2.id).to.be.true;
     expect(spy.getCall(1).args[1]).to.equal("value2");
   });
+  
+  it('should count the number of elements in hashmap', () => {
+    let map = new HashTable();
+  
+    expect(map.count).to.equal(0);
+    
+    map.put({id: 1}, 'value');
+    map.put({id: 1}, 'value2');
+    
+    expect(map.count).to.equal(2);
+    
+    map.put({id:1}, 'value3');
+    expect(map.count).to.equal(3);
+  })
 });

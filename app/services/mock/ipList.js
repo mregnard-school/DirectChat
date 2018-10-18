@@ -19,6 +19,15 @@ module.exports = [
           "date": date,
           "content": "Hello",
         }
+      },
+      {
+        "message": {
+          "id": 2,
+          "chat_id": 1,
+          "author_id": 1,
+          "date": date,
+          "content": "Hello 2",
+        }
       }
     ]
   }

@@ -51,4 +51,19 @@ describe('Client', () => {
     
     expect(stub.calledTwice).to.be.true;
   });
+  
+  it('should connect to each friend', () => {
+    const mockCLient = clients[0];
+    const mockFriends= [
+        clients[1],
+        clients[2],
+    ];
+    
+    const client = new Client(mockCLient);
+    client.mapFriendsToIPs(mockFriends);
+    const stub = sinon.stub(client.node, 'connectTo');
+    
+    client.connectToEachClient();
+    expect(stub.calledTwice).to.be.true;
+  });
 });

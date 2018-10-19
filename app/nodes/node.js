@@ -14,12 +14,12 @@ class Node {
   }
   
   setOnReceiveData(onReceiveData) {
-    this.setOnReceiveData = onReceiveData;
+    this.onReceivedData = onReceiveData;
     return this;
   }
   
   setOnEndConnection(onEndConnection) {
-    this.setOnEndConnection = onEndConnection;
+    this.onEndConnection = onEndConnection;
     return this;
   }
   
@@ -28,14 +28,14 @@ class Node {
       this.sockets.push(socket);
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
-      this.iniitializeConnectionHandler(serverConnectionHandler);
+      this.initializeConnectionHandler(serverConnectionHandler);
       
     });
     
     this.serverSocket.listen(port);
   }
   
-  iniitializeConnectionHandler(handler, resolve, reject) {
+  initializeConnectionHandler(handler, resolve, reject) {
     handler.setOnReceiveData(this.onReceivedData)
         .setOnConnectionClose(this.onEndConnection)
         .setOnError((error) => {
@@ -62,7 +62,7 @@ class Node {
       clientSocket.connect(port, ip, () => {
         this.sockets.push(clientSocket);
         const handler = new ClientHandler(clientSocket, this.client);
-        this.iniitializeConnectionHandler(handler, resolve, reject);
+        this.initializeConnectionHandler(handler, resolve, reject);
       });
     });
   }

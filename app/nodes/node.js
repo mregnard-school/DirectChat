@@ -19,7 +19,8 @@ class Node {
   }
   
   setOnEndConnection(onEndConnection) {
-    this.setOnEndConnection(onEndConnection);
+    this.setOnEndConnection = onEndConnection;
+    return this;
   }
   
   runServer(port) {
@@ -28,6 +29,7 @@ class Node {
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
       this.iniitializeConnectionHandler(serverConnectionHandler);
+      
     });
     
     this.serverSocket.listen(port);

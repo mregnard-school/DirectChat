@@ -34,6 +34,18 @@ class Client {
       this.node.connectTo(value.ip, value.port);
     });
   }
+  
+  runServer(port) {
+    this.node.runServer(port);
+  }
+  
+  setOnReceiveData(onReceiveData) {
+    this.node.setOnReceiveData(onReceiveData);
+  }
+  
+  setOnEndConnection(onEndConnection) {
+    this.node.setOnEndConnection(onEndConnection);
+  }
 }
 
 module.exports = Client;

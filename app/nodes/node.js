@@ -3,7 +3,7 @@ const chain = require('./middlewares/');
 const ServerHandler = require('./network/connectionHandler').Server;
 const ClientHandler = require('./network/connectionHandler').Client;
 
-class Callback {
+class ChangeableCallback {
   constructor(callback) {
     this.callback = callback;
   }
@@ -23,18 +23,15 @@ class Node {
     this.sockets = []; //Maybe change this with hashmap client/socket
     this.serverSocket = undefined;
     this.middleWareChain = chain;
-    
-    this.onReceivedData = () => {};
     this.onEndConnection = () => {
     };
     this.onNewConnection = () => {
     };
   
-    this.callbackHandler = new Callback(this.onReceivedData);
+    this.callbackHandler = new ChangeableCallback(() => {});
   }
   
   setOnReceiveData(onReceiveData) {
-    this.onReceivedData = onReceiveData;
     this.callbackHandler.setCallback(onReceiveData);
     return this;
   }
@@ -64,7 +61,7 @@ class Node {
   }
   
   initializeConnectionHandler(handler, resolve, reject) {
-    handler.setOnReceiveData(this.callbackHandler)
+    handler.setCallbackHandler(this.callbackHandler)
         .setOnConnectionClose(this.onEndConnection)
         .setOnError((error) => {
           if (reject) {

@@ -7,14 +7,15 @@ class HandshakeHandler {
     this.handshaked = false;
   }
   
-  handleData(data, onReceiveData, resolve) {
+  handleData(data, callbackHandler, resolve) {
     if(!this.handshaked && data.includes(handshakeInfo)) {
       this.handleHandshake(data);
       if(resolve) {
         resolve();
       }
     } else {
-      onReceiveData.getCallback()(data);
+      let callback = callbackHandler.getCallback();
+      callback(data);
     }
   }
   

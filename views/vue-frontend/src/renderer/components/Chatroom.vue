@@ -1,12 +1,7 @@
 <template>
   <div class="chatroom">
     chat with {{name}}
-    <!-- // TODO irindul 2018-10-18 : temp-->
-    <div v-if="run">
-      <label for="port">Port : </label>
-      <input type="text" v-model="port" id="port">
-      <button @click="runServer">Run server</button>
-    </div>
+
 
     <div class="conversation">
       <div v-for="message in messages">
@@ -19,43 +14,45 @@
 
     <div class="sendBox">
       <label for="messageInput"></label>
-      <input type="text" id="messageInput">
-
-      <button>Send</button>
+      <input type="text" id="messageInput" v-model="messageToSend">
+      <button @click="sendMessage">Send</button>
     </div>
   </div>
 </template>
 
 <script>
 
-  import mocks from 'p2p/services/mock'; // TODO irindul 2018-10-18 : Add as props
   import Client from 'p2p/client/client';
+
   export default {
     name: 'Chatroom',
-    props: [
-      //'peer', // TODO irindul 2018-10-18 : fetch from server
-    ],
+    props: {
+      friend: {
+        type: Object,
+      },
+      peer: {
+        type: Client,
+      }
+    },
     data() {
       return {
-        name: 'Billy',
-        client: {},
-        port: 5000,
-        run: true,
         messages: [],
+        messageToSend: '',
+        name: '',
       }
     },
     mounted() {
-      this.peer = new Client(mocks.clients[0]);
-      this.peer.setOnReceiveData(this.onReceiveData);
-      this.name = this.peer.client.pseudo;
+      this.name = this.friend.pseudo;
+      this.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
-      runServer() {
-        this.peer.runServer(this.port);
-        this.run = false;
-      },
       onReceiveData(data) {
         this.messages.push(data);
+      },
+      sendMessage() {
+        this.peer.node.writeMessageTo(this.friend, this.messageToSend);
+        this.messages.push(this.messageToSend);
+        this.messageToSend = '';
       }
     }
   }

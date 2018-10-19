@@ -8,10 +8,12 @@ class ConnectionHandler {
     this.onReceiveData = () => {};
     this.onConnectionClose = () => {};
     this.onError = () => {};
+    this.callback = {};
   }
   
   setOnReceiveData(onReceiveData) {
-    this.onReceiveData = onReceiveData;
+    //this.onReceiveData = onReceiveData;
+    this.callback = onReceiveData;
     return this;
   }
   
@@ -40,7 +42,7 @@ class ConnectionHandler {
   
   handleHandshake(data, resolve) {
     const handshakeHandler = this.getHandshakeHandler();
-    handshakeHandler.handleData(data, this.onReceiveData, resolve);
+    handshakeHandler.handleData(data, this.callback, resolve);
   }
   
   getHandshakeHandler() {

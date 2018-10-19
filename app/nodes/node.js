@@ -3,18 +3,39 @@ const chain = require('./middlewares/');
 const ServerHandler = require('./network/connectionHandler').Server;
 const ClientHandler = require('./network/connectionHandler').Client;
 
+class Callback {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  
+  setCallback(callback) {
+    this.callback = callback;
+  }
+  
+  getCallback() {
+    return this.callback;
+  }
+}
+
 class Node {
   constructor(client) {
     this.client = client;
     this.sockets = []; //Maybe change this with hashmap client/socket
     this.serverSocket = undefined;
     this.middleWareChain = chain;
+    
     this.onReceivedData = () => {};
-    this.onEndConnection = () => {};
+    this.onEndConnection = () => {
+    };
+    this.onNewConnection = () => {
+    };
+  
+    this.callbackHandler = new Callback(this.onReceivedData);
   }
   
   setOnReceiveData(onReceiveData) {
     this.onReceivedData = onReceiveData;
+    this.callbackHandler.setCallback(onReceiveData);
     return this;
   }
   
@@ -23,12 +44,19 @@ class Node {
     return this;
   }
   
+  setOnNewConnection(onNewConnection) {
+    this.onNewConnection = onNewConnection;
+    return this;
+  }
+  
   runServer(port) {
     this.serverSocket = net.createServer((socket) => {
       this.sockets.push(socket);
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
-      this.initializeConnectionHandler(serverConnectionHandler);
+      this.initializeConnectionHandler(serverConnectionHandler, () => {
+        this.onNewConnection(socket);
+      });
       
     });
     
@@ -36,10 +64,10 @@ class Node {
   }
   
   initializeConnectionHandler(handler, resolve, reject) {
-    handler.setOnReceiveData(this.onReceivedData)
+    handler.setOnReceiveData(this.callbackHandler)
         .setOnConnectionClose(this.onEndConnection)
         .setOnError((error) => {
-          if(reject) {
+          if (reject) {
             reject(error);
           }
           else {

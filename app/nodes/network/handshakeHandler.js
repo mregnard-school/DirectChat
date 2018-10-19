@@ -14,7 +14,7 @@ class HandshakeHandler {
         resolve();
       }
     } else {
-      onReceiveData(data);
+      onReceiveData.getCallback()(data);
     }
   }
   

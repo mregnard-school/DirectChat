@@ -41,10 +41,16 @@ class Client {
   
   setOnReceiveData(onReceiveData) {
     this.node.setOnReceiveData(onReceiveData);
+    return this;
   }
   
   setOnEndConnection(onEndConnection) {
     this.node.setOnEndConnection(onEndConnection);
+    return this;
+  }
+  
+  setOnNewConnection(onNewConnection) {
+    this.node.setOnNewConnection(onNewConnection);
   }
 }
 

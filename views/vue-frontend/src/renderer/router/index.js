@@ -8,8 +8,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Chatroom',
-      component: require('@/components/Chatroom').default
+      name: 'Home',
+      component: require('@/components/Home').default
     },
   ]
 })

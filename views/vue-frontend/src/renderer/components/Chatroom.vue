@@ -1,9 +1,10 @@
 <template>
   <div class="chatroom">
-    chat with {{name}}
+    <div class="header">
+      <h1>{{name}}</h1>
+    </div>
 
-
-    <div class="conversation">
+    <div ref="messagesDisplay" class="conversation">
       <div v-for="message in messages">
         <message v-bind:message="message"></message>
       </div>
@@ -48,19 +49,61 @@
     },
     methods: {
       onReceiveData(data) {
-        this.messages.push(JSON.parse(data));
+        this.addNewMessage(data);
       },
       sendMessage() {
+        // TODO irindul 2018-10-20 : Send conversation instead of friend, loop through each client (execpt us) from
+        // the conversation, use the id to build the message !
         this.peer.node.writeMessageTo(this.friend, this.messageToSend)
             .then(message => {
-              this.messages.push(JSON.parse(message));
+              this.addNewMessage(message);
             });
 
         this.messageToSend = '';
+      },
+      addNewMessage(message) {
+        this.messages.push(JSON.parse(message));
+        let messagesDisplay = this.$refs.messagesDisplay;
+        messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
+
       }
     }
   }
 </script>
 
-<style>
+<style lang="scss">
+  @import '~styles/global';
+  .chatroom {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    padding: 10px;
+    .header {
+      flex: 1;
+      h1 {
+        font-family: $main-font;
+        font-size: Medium; // TODO irindul 2018-10-20 : Change with custom font-size
+      }
+    }
+
+    .conversation {
+      display: flex;
+      flex: 8;
+      overflow: auto;
+      flex-direction: column;
+      box-shadow: 0 0 5px $lightGrey;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      min-height: 80%;
+      .message {
+        flex: 1;
+      }
+    }
+
+    .sendBox {
+      flex: 1;
+    }
+  }
 </style>

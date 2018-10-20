@@ -8,7 +8,6 @@
     </div>
 
     <div v-for="chatroom in chatrooms">
-
       <chatroom v-bind:peer="peer" v-bind:friend="chatroom.client"></chatroom>
     </div>
   </div>
@@ -16,7 +15,7 @@
 
 <script>
 
-  import Chatroom from './Chatroom';
+  import Chatroom from 'components/Chatroom';
   import mocks from 'p2p/services/mock'; // TODO irindul 2018-10-18 : Fetch after auth (create your own object instead of mock)
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';

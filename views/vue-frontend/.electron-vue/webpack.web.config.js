@@ -107,7 +107,8 @@ let webConfig = {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
       'vue$': 'vue/dist/vue.esm.js',
-      'p2p': path.join(__dirname, '../../../app')
+      'p2p': path.join(__dirname, '../../../app'),
+      'components': path.join(__dirname, '../src/renderer/components')
     },
     extensions: ['.js', '.vue', '.json', '.css']
   },

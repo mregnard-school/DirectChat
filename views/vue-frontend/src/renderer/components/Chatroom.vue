@@ -5,16 +5,13 @@
 
     <div class="conversation">
       <div v-for="message in messages">
-        <p>
-          <!-- // TODO irindul 2018-10-19 : Template message with JSON object and VUe component-->
-          {{message}}
-        </p>
+        <message v-bind:message="message"></message>
       </div>
     </div>
 
     <div class="sendBox">
       <label for="messageInput"></label>
-      <input type="text" id="messageInput" v-model="messageToSend">
+      <input type="text" id="messageInput" v-model="messageToSend" v-on:keyup.enter="sendMessage">
       <button @click="sendMessage">Send</button>
     </div>
   </div>
@@ -23,9 +20,13 @@
 <script>
 
   import Client from 'p2p/client/client';
+  import Message from 'components/Message';
 
   export default {
     name: 'Chatroom',
+    components: {
+      Message,
+    },
     props: {
       friend: {
         type: Object,
@@ -47,11 +48,14 @@
     },
     methods: {
       onReceiveData(data) {
-        this.messages.push(data);
+        this.messages.push(JSON.parse(data));
       },
       sendMessage() {
-        this.peer.node.writeMessageTo(this.friend, this.messageToSend);
-        this.messages.push(this.messageToSend);
+        this.peer.node.writeMessageTo(this.friend, this.messageToSend)
+            .then(message => {
+              this.messages.push(JSON.parse(message));
+            });
+
         this.messageToSend = '';
       }
     }

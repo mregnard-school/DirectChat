@@ -1,4 +1,5 @@
 const net = require('net');
+const moment = require('moment');
 const chain = require('./middlewares/');
 const ServerHandler = require('./network/connectionHandler').Server;
 const ClientHandler = require('./network/connectionHandler').Client;
@@ -27,8 +28,9 @@ class Node {
     };
     this.onNewConnection = () => {
     };
-  
-    this.callbackHandler = new ChangeableCallback(() => {});
+    
+    this.callbackHandler = new ChangeableCallback(() => {
+    });
   }
   
   setOnReceiveData(onReceiveData) {
@@ -92,12 +94,38 @@ class Node {
     });
   }
   
-  writeMessageTo(client, message) {
+  writeRaw(client, message) {
     let content = this.applyMiddlewares(message);
     let sockets = this.socketsAssociatedWithClient(client);
-    sockets.forEach(socket => {
-      socket.write(content); // TODO irindul 2018-10-16 : Construct message object here (date, author, content etc..)
+    sockets.forEach((socket) => {
+      socket.write(content);
+    })
+  }
+  
+  writeMessageTo(client, message) {
+    return new Promise((resolve) => {
+      const content = this.applyMiddlewares(message);
+      const sockets = this.socketsAssociatedWithClient(client);
+      const messageObject = this.constructMesage(content);
+      sockets.forEach(socket => {
+        socket.write(messageObject);
+      });
+      resolve(messageObject)
     });
+  }
+  
+  constructMesage(content) {
+    const message = {
+      id: 1, // TODO irindul 2018-10-20 : Genererate id... (sha-256 of content is the best)
+      conversation_id: 1, // TODO irindul 2018-10-20 : Add conversation id with some black magic...
+      date: moment().format("YYYY-mm-DD"), // TODO irindul 2018-10-20 : Maybe add time(hours, min, sec, ms) for completeness
+      author: {
+        id: this.client.id,
+        pseudo: this.client.pseudo,
+      },
+      content: content,
+    };
+    return JSON.stringify(message);
   }
   
   applyMiddlewares(message) {

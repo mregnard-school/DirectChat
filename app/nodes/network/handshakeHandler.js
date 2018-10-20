@@ -39,7 +39,7 @@ class HandshakeHandler {
   }
   
   buildHandshakeMessage() {
-    return handshakeInfo + this.client.id + ' ' + this.client.pseudo;
+    return handshakeInfo + this.client.id + ' ' + this.client.pseudo + '\n';
   }
 }
 

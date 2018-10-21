@@ -22,6 +22,7 @@
 
   import Client from 'p2p/client/client';
   import Message from 'components/Message';
+  import store from '@/mutableStore';
 
   export default {
     name: 'Chatroom',
@@ -32,9 +33,6 @@
       friend: {
         type: Object,
       },
-      peer: {
-        type: Client,
-      }
     },
     data() {
       return {
@@ -45,7 +43,7 @@
     },
     mounted() {
       this.name = this.friend.pseudo;
-      this.peer.node.setOnReceiveData(this.onReceiveData)
+      store.state.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
       onReceiveData(data) {
@@ -54,7 +52,7 @@
       sendMessage() {
         // TODO irindul 2018-10-20 : Send conversation instead of friend, loop through each client (execpt us) from
         // the conversation, use the id to build the message !
-        this.peer.node.writeMessageTo(this.friend, this.messageToSend)
+        store.state.peer.node.writeMessageTo(this.friend, this.messageToSend)
             .then(message => {
               this.addNewMessage(message);
             });

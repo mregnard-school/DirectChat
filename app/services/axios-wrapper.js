@@ -45,6 +45,22 @@ class MockWrapper {
       })
     }
   }
+  
+  post(url, payload) {
+    if(url.includes('login')) {
+      if(payload.pseudo === 'Billy' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 1, // TODO irindul 2018-10-20 : Create token here
+            pseudo: payload.pseudo,
+            ips: [
+                "127.0.0.1:5000",
+            ]
+          }
+        })
+      }
+    }
+  }
 }
 
 //const http = new Wrapper().service;

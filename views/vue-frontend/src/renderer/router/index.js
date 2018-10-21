@@ -8,8 +8,13 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'Login',
+      component: require('@/components/Login').default
+    },
+    {
+      path: '/home',
       name: 'Home',
       component: require('@/components/Home').default
-    },
+    }
   ]
 })

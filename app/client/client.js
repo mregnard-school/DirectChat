@@ -1,5 +1,6 @@
 const Node = require('../nodes/node');
 const HashTable = require('../services/util').HashTable;
+const parseIp = require('../services/util').parseIpAndPortFromString;
 
 class Client {
   constructor(client) {
@@ -8,13 +9,7 @@ class Client {
     this.node = new Node(client);
   }
   
-  parseIpAndPortFromString(ipString) {
-    let splited = ipString.split(':');
-    return {
-      "ip": splited[0],
-      "port": parseInt(splited[1]),
-    }
-  }
+  
   
   mapFriendsToIPs(friends) {
     friends.forEach((friend) => {
@@ -25,7 +20,7 @@ class Client {
   }
   
   addFriendIpToTable(friend, ip) {
-    let ipEntry = this.parseIpAndPortFromString(ip);
+    let ipEntry = parseIp(ip);
     this.ipTable.put(friend, ipEntry);
   }
   

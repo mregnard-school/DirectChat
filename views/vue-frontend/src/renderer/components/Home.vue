@@ -2,15 +2,13 @@
   <div class="home">
     <div class="chatroom-thumbnails">
       <div class="chatroom-thumbnail" v-for="chatroom in chatrooms">
-        <div @click="selectChatroom(chatroom)">
-          {{chatroom.name}}
-        </div>
+        <chatroom-thumbnail v-bind:chatroom="chatroom"
+                            v-on:select-chatroom="changeChatroom"/>
       </div>
     </div>
 
-
     <div v-if="selectedChatroom" class="selected-chatroom">
-      <chatroom v-bind:friend="selectedChatroom.client"></chatroom>
+      <chatroom v-bind:conversation="selectedChatroom"></chatroom>
     </div>
   </div>
 </template>
@@ -18,6 +16,7 @@
 <script>
 
   import Chatroom from 'components/Chatroom';
+  import ChatroomThumbnail from 'components/ChatroomThumbnail';
   import store from '@/mutableStore';
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';
@@ -27,6 +26,7 @@
     name: "Home",
     components: {
       Chatroom,
+      ChatroomThumbnail,
     },
     data() {
       return {
@@ -35,7 +35,6 @@
       }
     },
     mounted() {
-      console.log(store.state);
       store.state.peer.setOnNewConnection(this.onNewConnection);
       const port = parseIpAndPortFromString(store.state.peer.client.ips[0]).port;
       store.state.peer.runServer(port);
@@ -44,8 +43,8 @@
       onNewConnection(socket) {
         // TODO irindul 2018-10-19 : Define proper conversation structure
         const conversation = {
-          'id': 1, // TODO irindul 2018-10-19 : Define id
-          'client': socket.client,
+          'id': this.chatrooms.length+1, // TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated)
+          'friend': socket.client,
           'name': socket.client.pseudo,
           'socket': socket, // TODO irindul 2018-10-19 : See if useful
           'messages': [], // TODO irindul 2018-10-19 : Fetch from local
@@ -53,10 +52,11 @@
 
         this.chatrooms.push(conversation)
       },
-      selectChatroom(chatroom) {
+      changeChatroom(chatroom) {
         this.selectedChatroom = chatroom;
+        console.log(this.selectedChatroom);
       }
-    }
+    },
   }
 </script>
 

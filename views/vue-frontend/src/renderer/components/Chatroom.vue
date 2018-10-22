@@ -1,11 +1,16 @@
 <template>
   <div class="chatroom">
     <div class="header">
-      <h1>{{name}}</h1>
+      <div v-if="changingName">
+        <input v-model="conversation.name" type="text" v-on:keyup.enter="toggleChangingName"/>
+      </div>
+      <div v-else @click="toggleChangingName">
+        <h1>{{conversation.name}}</h1>
+      </div>
     </div>
 
     <div ref="messagesDisplay" class="conversation">
-      <div v-for="message in messages">
+      <div v-for="message in conversation.messages">
         <message v-bind:message="message"></message>
       </div>
     </div>
@@ -17,7 +22,6 @@
     </div>
   </div>
 </template>
-
 <script>
 
   import Client from 'p2p/client/client';
@@ -30,29 +34,32 @@
       Message,
     },
     props: {
-      friend: {
+      conversation: {
         type: Object,
-      },
+      }
     },
     data() {
       return {
-        messages: [],
         messageToSend: '',
-        name: '',
+        changingName: false,
       }
     },
     mounted() {
-      this.name = this.friend.pseudo;
+      this.name = this.conversation.friend.pseudo;
       store.state.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
+      toggleChangingName() {
+        this.changingName = !this.changingName;
+        // TODO irindul 2018-10-22 : find a way to propagate change for all members of chat
+      },
       onReceiveData(data) {
         this.addNewMessage(data);
       },
       sendMessage() {
         // TODO irindul 2018-10-20 : Send conversation instead of friend, loop through each client (execpt us) from
         // the conversation, use the id to build the message !
-        store.state.peer.node.writeMessageTo(this.friend, this.messageToSend)
+        store.state.peer.node.writeMessageTo(this.conversation.friend, this.messageToSend)
             .then(message => {
               this.addNewMessage(message);
             });
@@ -60,10 +67,9 @@
         this.messageToSend = '';
       },
       addNewMessage(message) {
-        this.messages.push(JSON.parse(message));
+        this.conversation.messages.push(JSON.parse(message));
         let messagesDisplay = this.$refs.messagesDisplay;
         messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
-
       }
     }
   }

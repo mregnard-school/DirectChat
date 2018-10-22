@@ -20,8 +20,8 @@
     name: "Login",
     data() {
       return {
-        pseudo: '',
-        password: '',
+        pseudo: 'Billy',
+        password: 'azerty',
       }
     },
     methods: {

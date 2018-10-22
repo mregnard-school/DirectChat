@@ -47,7 +47,7 @@
     },
     mounted() {
       this.name = this.name === '' ? this.conversation.friend.pseudo : this.name;
-      store.state.peer.node.setOnReceiveData(this.onReceiveData)
+
     },
     methods: {
       toggleChangingName() {

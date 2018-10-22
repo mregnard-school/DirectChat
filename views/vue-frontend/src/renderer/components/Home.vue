@@ -42,15 +42,16 @@
       store.state.peer.setOnNewConnection(this.onNewConnection);
       const port = parseIpAndPortFromString(store.state.peer.client.ips[0]).port;
       store.state.peer.runServer(port);
+      store.state.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
       onNewConnection(socket) {
+        // TODO irindul 2018-10-22 : Check here if convo contains the client otherwise create new
         // TODO irindul 2018-10-19 : Define proper conversation structure
         const conversation = {
           'id': this.chatrooms.length + 1, // TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated)
           'friends': [socket.client],
           'name': socket.client.pseudo,
-          'socket': socket, // TODO irindul 2018-10-19 : See if useful
           'messages': [], // TODO irindul 2018-10-19 : Fetch from local
         };
 
@@ -59,6 +60,12 @@
           component: Chatroom,
         };
         this.chatrooms.push(conversationWrapper)
+      },
+      onReceiveData(data){
+        const message = JSON.parse(data);
+        let conversation_id = message.conversation_id;
+        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find((conv) => conv.id === conversation_id)
+        conversation.messages.push(message);
       },
       changeChatroom(chatroom) {
         let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);

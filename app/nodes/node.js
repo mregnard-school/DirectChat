@@ -56,7 +56,6 @@ class Node {
       this.initializeConnectionHandler(serverConnectionHandler, () => {
         this.onNewConnection(socket);
       });
-      
     });
     
     this.serverSocket.listen(port);
@@ -64,7 +63,11 @@ class Node {
   
   initializeConnectionHandler(handler, resolve, reject) {
     handler.setCallbackHandler(this.callbackHandler)
-        .setOnConnectionClose(this.onEndConnection)
+        .setOnConnectionClose((socket) => {
+          console.log('Removing socket');
+          this.sockets = this.sockets.filter(sock => sock !== socket);
+          this.onEndConnection()
+        })
         .setOnError((error) => {
           if (reject) {
             reject(error);

@@ -58,8 +58,12 @@
         this.addNewMessage(data);
       },
       sendMessage() {
-        this.writeMessageToAll(this.messageToSend);
-        this.messageToSend = '';
+        if(this.messageToSend !== '') {
+          this.writeMessageToAll(this.messageToSend);
+          this.messageToSend = '';
+        }
+
+
       },
       writeMessageToAll(content) {
         const message = {

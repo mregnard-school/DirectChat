@@ -35,7 +35,9 @@ class ConnectionHandler {
     this.socket.on('data', (data) => {
       this.handleHandshake(data, resolve);
     });
-    this.socket.on('end', this.onConnectionClose);
+    this.socket.on('end', () => {
+      this.onConnectionClose(this.socket);
+    });
     this.socket.on('error', this.onError);
   }
   

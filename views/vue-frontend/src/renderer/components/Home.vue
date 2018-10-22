@@ -1,15 +1,19 @@
 <template>
   <div class="home">
     <div class="chatroom-thumbnails">
-      <div class="chatroom-thumbnail" v-for="chatroom in chatrooms">
-        <chatroom-thumbnail v-bind:chatroom="chatroom"
+      <div class="chatroom-thumbnail" v-for="wrapper in chatrooms">
+        <chatroom-thumbnail v-bind:chatroom="wrapper.conversation"
                             v-on:select-chatroom="changeChatroom"/>
       </div>
     </div>
 
-    <div v-if="selectedChatroom" class="selected-chatroom">
-      <chatroom v-bind:conversation="selectedChatroom"></chatroom>
-    </div>
+
+    <keep-alive>
+      <component :is="activeComponent"
+                 v-bind="activeProperties"
+                 :key="activeChatroom.id"
+      />
+    </keep-alive>
   </div>
 </template>
 
@@ -31,7 +35,7 @@
     data() {
       return {
         chatrooms: [],
-        selectedChatroom: false,
+        selectedChatroom: null,
       }
     },
     mounted() {
@@ -43,20 +47,53 @@
       onNewConnection(socket) {
         // TODO irindul 2018-10-19 : Define proper conversation structure
         const conversation = {
-          'id': this.chatrooms.length+1, // TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated)
-          'friend': socket.client,
+          'id': this.chatrooms.length + 1, // TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated)
+          'friends': [socket.client],
           'name': socket.client.pseudo,
           'socket': socket, // TODO irindul 2018-10-19 : See if useful
           'messages': [], // TODO irindul 2018-10-19 : Fetch from local
         };
 
-        this.chatrooms.push(conversation)
+        let conversationWrapper = {
+          conversation: conversation,
+          component: Chatroom,
+        };
+        this.chatrooms.push(conversationWrapper)
       },
       changeChatroom(chatroom) {
-        this.selectedChatroom = chatroom;
-        console.log(this.selectedChatroom);
+        let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
+        this.selectedChatroom = wrapper;
+        console.log(this.selectedChatroom.component.data);
       }
     },
+    computed: {
+      activeComponent() {
+        if(this.selectedChatroom) {
+          return this.selectedChatroom.component;
+        }
+
+        return null
+      },
+      activeProperties() {
+        if(this.selectedChatroom) {
+          return {
+            conversation: this.selectedChatroom.conversation
+          }
+        }
+
+        return {};
+
+      },
+      activeChatroom() {
+        if(this.selectedChatroom) {
+          return this.selectedChatroom.conversation
+        }
+
+        return {
+          id: 0,
+        }
+      }
+    }
   }
 </script>
 

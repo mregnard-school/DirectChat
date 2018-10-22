@@ -27,6 +27,7 @@
   import Client from 'p2p/client/client';
   import Message from 'components/Message';
   import store from '@/mutableStore';
+  import moment from 'moment';
 
   export default {
     name: 'Chatroom',
@@ -45,7 +46,7 @@
       }
     },
     mounted() {
-      this.name = this.conversation.friend.pseudo;
+      this.name = this.name === '' ? this.conversation.friend.pseudo : this.name;
       store.state.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
@@ -59,12 +60,29 @@
       sendMessage() {
         // TODO irindul 2018-10-20 : Send conversation instead of friend, loop through each client (execpt us) from
         // the conversation, use the id to build the message !
-        store.state.peer.node.writeMessageTo(this.conversation.friend, this.messageToSend)
-            .then(message => {
-              this.addNewMessage(message);
-            });
-
+        this.writeMessageToAll(this.messageToSend);
         this.messageToSend = '';
+      },
+      writeMessageToAll(content) {
+        const message = {
+          id: this.conversation.messages.length+1, // TODO irindul 2018-10-20 : Genererate id... (sha-256 of content + date(for unicity) is the best)
+          conversation_id: this.conversation.id,
+          date: moment().format("YYYY-mm-DD"), // TODO irindul 2018-10-20 : Maybe add time(hours, min, sec, ms) for completeness
+          author: {
+            id: store.state.peer.client.id,
+            pseudo: store.state.peer.client.pseudo,
+          },
+          content: content,
+        };
+        this.conversation.friends.forEach(friend => {
+          if(friend.id !== store.state.peer.client.id) {
+            this.writeMessageTo(friend, message);
+          }
+        });
+        this.conversation.messages.push(message);
+      },
+      writeMessageTo(friend, message) {
+        store.state.peer.node.writeMessageTo(friend, message);
       },
       addNewMessage(message) {
         this.conversation.messages.push(JSON.parse(message));

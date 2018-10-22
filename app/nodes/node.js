@@ -103,28 +103,15 @@ class Node {
   }
   
   writeMessageTo(client, message) {
-    return new Promise((resolve) => {
-      const content = this.applyMiddlewares(message);
-      const sockets = this.socketsAssociatedWithClient(client);
-      const messageObject = this.constructMesage(content);
-      sockets.forEach(socket => {
-        socket.write(messageObject);
-      });
-      resolve(messageObject)
+    const sockets = this.socketsAssociatedWithClient(client);
+    const messageObject = this.constructMesage(message);
+    sockets.forEach(socket => {
+      socket.write(messageObject);
     });
   }
   
-  constructMesage(content) {
-    const message = {
-      id: 1, // TODO irindul 2018-10-20 : Genererate id... (sha-256 of content is the best)
-      conversation_id: 1, // TODO irindul 2018-10-20 : Add conversation id with some black magic...
-      date: moment().format("YYYY-mm-DD"), // TODO irindul 2018-10-20 : Maybe add time(hours, min, sec, ms) for completeness
-      author: {
-        id: this.client.id,
-        pseudo: this.client.pseudo,
-      },
-      content: content,
-    };
+  constructMesage(message) {
+    message.content = this.applyMiddlewares(message.content);
     return JSON.stringify(message);
   }
   

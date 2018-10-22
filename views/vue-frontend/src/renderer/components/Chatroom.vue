@@ -58,8 +58,6 @@
         this.addNewMessage(data);
       },
       sendMessage() {
-        // TODO irindul 2018-10-20 : Send conversation instead of friend, loop through each client (execpt us) from
-        // the conversation, use the id to build the message !
         this.writeMessageToAll(this.messageToSend);
         this.messageToSend = '';
       },
@@ -67,7 +65,7 @@
         const message = {
           id: this.conversation.messages.length+1, // TODO irindul 2018-10-20 : Genererate id... (sha-256 of content + date(for unicity) is the best)
           conversation_id: this.conversation.id,
-          date: moment().format("YYYY-mm-DD"), // TODO irindul 2018-10-20 : Maybe add time(hours, min, sec, ms) for completeness
+          date: moment().format("YYYY-mm-DD HH:mm:ss"),
           author: {
             id: store.state.peer.client.id,
             pseudo: store.state.peer.client.pseudo,

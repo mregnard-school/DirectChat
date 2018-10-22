@@ -46,25 +46,30 @@
     },
     methods: {
       onNewConnection(socket) {
-        // TODO irindul 2018-10-22 : Check here if convo contains the client otherwise create new
-        // TODO irindul 2018-10-19 : Define proper conversation structure
-        const conversation = {
-          'id': this.chatrooms.length + 1, // TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated)
-          'friends': [socket.client],
-          'name': socket.client.pseudo,
-          'messages': [], // TODO irindul 2018-10-19 : Fetch from local
-        };
+       //todo Handle Machin is connected here
 
-        let conversationWrapper = {
-          conversation: conversation,
-          component: Chatroom,
-        };
-        this.chatrooms.push(conversationWrapper)
       },
       onReceiveData(data){
         const message = JSON.parse(data);
-        let conversation_id = message.conversation_id;
-        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find((conv) => conv.id === conversation_id)
+        let conversation_id = message.conversation.id;
+        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find((conv) => conv.id === conversation_id);
+
+        if(!conversation) {
+          conversation = {
+            'id': this.chatrooms.length + 1,// TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated),
+            'name': message.conversation.name,
+            'friends': message.conversation.friends,
+            'messages': [],
+          };
+          let conversationWrapper = {
+            conversation: conversation,
+            component: Chatroom,
+          };
+        
+          this.chatrooms.push(conversationWrapper)
+
+        }
+
         conversation.messages.push(message);
       },
       changeChatroom(chatroom) {

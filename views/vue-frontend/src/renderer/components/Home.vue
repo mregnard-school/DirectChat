@@ -5,6 +5,9 @@
         <chatroom-thumbnail v-bind:chatroom="wrapper.conversation"
                             v-on:select-chatroom="changeChatroom"/>
       </div>
+      <div>
+        <button class="new-conversation" @click="handleNewConversation">New Conversation</button>
+      </div>
     </div>
 
 
@@ -12,6 +15,7 @@
       <component :is="activeComponent"
                  v-bind="activeProperties"
                  :key="activeChatroom.id"
+                 v-on:new-chatroom="newChatroom"
       />
     </keep-alive>
   </div>
@@ -20,6 +24,7 @@
 <script>
 
   import Chatroom from 'components/Chatroom';
+  import NewChatroom from 'components/NewChatroom';
   import ChatroomThumbnail from 'components/ChatroomThumbnail';
   import store from '@/mutableStore';
   import Client from 'p2p/client/client';
@@ -31,6 +36,7 @@
     components: {
       Chatroom,
       ChatroomThumbnail,
+      NewChatroom,
     },
     data() {
       return {
@@ -40,14 +46,83 @@
     },
     mounted() {
       store.state.peer.setOnNewConnection(this.onNewConnection);
-      const port = parseIpAndPortFromString(store.state.peer.client.ips[0]).port;
+      const port = parseIpAndPortFromString(this.client.ips[0]).port;
       store.state.peer.runServer(port);
       store.state.peer.node.setOnReceiveData(this.onReceiveData)
     },
     methods: {
+      handleNewConversation() {
+        this.selectedChatroom = {
+          conversation: {},
+          component: NewChatroom,
+        }
+      },
       onNewConnection(socket) {
        //todo Handle Machin is connected here
 
+      },
+      newChatroom(pseudos) {
+        let friends = [];
+        this.client.friends.forEach(friend => {
+          if(pseudos.includes(friend.pseudo)) {
+            friends.push(friend);
+          }
+        });
+        if(friends.length > 0) {
+          let friendsAndMe = friends.concat([this.client]);
+          const createdMessageToSend = {
+            id: 0,
+            conversation : {
+              id: 0,
+              name: this.client.pseudo,
+              friends: friendsAndMe,
+            },
+            type: "informational",
+            content: "Chat with " + this.client.pseudo + " created !"
+          };
+          this.sendToAll(friends, createdMessageToSend);
+          const name = pseudos.join(", ");
+          const messageForMyslef = {
+            id: 0,
+            type: "informational",
+            conversation: {
+              name: name,
+              friends: friendsAndMe,
+            },
+            content: "Chat with " + name + " created",
+          };
+
+          const conversation = this.createConversationWithWrapper(messageForMyslef);
+          conversation.messages.push(messageForMyslef);
+        }
+      },
+      sendToAll(friends, message) {
+        friends.forEach(friend => {
+          if(friend.id !== this.client.id) {
+            this.node.writeMessageTo(friend, message);
+          }
+        });
+      },
+      createConversation(message) {
+        const conversation = {
+          'id': this.chatrooms.length + 1,// TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated),
+          'name': message.conversation.name,
+          'friends': message.conversation.friends || [],
+          'messages': [],
+        };
+
+        return conversation;
+      },
+      createConversationWithWrapper(message) {
+        const conversation = this.createConversation(message);
+
+        let conversationWrapper = {
+          conversation: conversation,
+          component: Chatroom,
+        };
+
+        this.chatrooms.push(conversationWrapper)
+        return conversation;
       },
       onReceiveData(data){
         const message = JSON.parse(data);
@@ -55,19 +130,7 @@
         let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find((conv) => conv.id === conversation_id);
 
         if(!conversation) {
-          conversation = {
-            'id': this.chatrooms.length + 1,// TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated),
-            'name': message.conversation.name,
-            'friends': message.conversation.friends,
-            'messages': [],
-          };
-          let conversationWrapper = {
-            conversation: conversation,
-            component: Chatroom,
-          };
-        
-          this.chatrooms.push(conversationWrapper)
-
+          conversation = this.createConversationWithWrapper(message);
         }
 
         conversation.messages.push(message);
@@ -79,6 +142,12 @@
       }
     },
     computed: {
+      client() {
+        return store.state.peer.client;
+      },
+      node() {
+        return store.state.peer.node;
+      },
       activeComponent() {
         if(this.selectedChatroom) {
           return this.selectedChatroom.component;
@@ -92,7 +161,6 @@
             conversation: this.selectedChatroom.conversation
           }
         }
-
         return {};
 
       },
@@ -104,7 +172,7 @@
         return {
           id: 0,
         }
-      }
+      },
     }
   }
 </script>

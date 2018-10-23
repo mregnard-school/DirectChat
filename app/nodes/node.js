@@ -44,12 +44,16 @@ class Node {
   }
   
   setOnNewConnection(onNewConnection) {
-    this.onNewConnection = onNewConnection;
+    this.onNewConnection = (socket) => {
+      console.log('connected');
+      onNewConnection(socket);
+    };
     return this;
   }
   
   runServer(port) {
     this.serverSocket = net.createServer((socket) => {
+      console.log('accepted');
       this.sockets.push(socket);
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
@@ -73,7 +77,8 @@ class Node {
             reject(error);
           }
           else {
-            console.error(error);
+            console.log('Server already running, not restarting');
+            //console.error(error);
           }
         })
         .handleOnConnection(resolve);
@@ -87,14 +92,24 @@ class Node {
   }
   
   connectTo(ip, port) {
-    const clientSocket = new net.Socket();
-    return new Promise((resolve, reject) => {
-      clientSocket.connect(port, ip, () => {
+    const socket = net.createConnection(port, ip);
+    this.sockets.push(socket);
+    const handler = new ClientHandler(socket, this.client);
+    this.initializeConnectionHandler(handler, () => {
+      console.log('handler initilization done');
+    })
+    
+    //return Promise.resolve();
+   // return new Promise((resolve, reject) => {
+      /*const clientSocket = net.createConnection({port: port, host: ip}, () => {
+        console.log('connected');
         this.sockets.push(clientSocket);
         const handler = new ClientHandler(clientSocket, this.client);
         this.initializeConnectionHandler(handler, resolve, reject);
-      });
-    });
+      })*/
+      
+      
+   // });
   }
   
   writeRaw(client, message) {

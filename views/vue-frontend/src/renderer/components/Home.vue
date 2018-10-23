@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    connected as {{this.client.pseudo}}
     <div class="chatroom-thumbnails">
       <div class="chatroom-thumbnail" v-for="wrapper in chatrooms">
         <chatroom-thumbnail v-bind:chatroom="wrapper.conversation"
@@ -48,7 +49,16 @@
       store.state.peer.setOnNewConnection(this.onNewConnection);
       const port = parseIpAndPortFromString(this.client.ips[0]).port;
       store.state.peer.runServer(port);
-      store.state.peer.node.setOnReceiveData(this.onReceiveData)
+      this.node.setOnReceiveData(this.onReceiveData);
+      this.client.friends.forEach(friend => {
+        if(friend.ips.length !== 0) {
+          friend.ips.forEach(ipPort => {
+            const parsed = parseIpAndPortFromString(ipPort);
+            console.log(parsed);
+            this.node.connectTo(parsed.ip, parsed.port);
+          })
+        }
+      });
     },
     methods: {
       handleNewConversation() {
@@ -138,7 +148,6 @@
       changeChatroom(chatroom) {
         let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
         this.selectedChatroom = wrapper;
-        console.log(this.selectedChatroom.component.data);
       }
     },
     computed: {

@@ -66,6 +66,26 @@ class MockWrapper {
           }
         })
       }
+      if(payload.pseudo === 'John' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 2,
+            pseudo: payload.pseudo,
+            ips: [
+              "127.0.0.1:5001",
+            ],
+            friends: [
+              {
+                "id": 1,
+                "pseudo": "Billy",
+                ips: [
+                    "127.0.0.1:5000"
+                ],
+              }
+            ]
+          }
+        })
+      }
     }
   }
 }

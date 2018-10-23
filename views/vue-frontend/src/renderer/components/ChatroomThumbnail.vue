@@ -16,7 +16,6 @@
     },
     methods: {
       select() {
-        console.log('emited');
         this.$emit('select-chatroom', this.chatroom);
       }
     }

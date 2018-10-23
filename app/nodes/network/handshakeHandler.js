@@ -35,6 +35,7 @@ class HandshakeHandler {
   }
   
   writeHandshake() {
+    console.log('writing handshake');
     this.socket.write(this.buildHandshakeMessage());
   }
   

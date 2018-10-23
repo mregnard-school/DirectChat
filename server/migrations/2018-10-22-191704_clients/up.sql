@@ -1,7 +1,8 @@
 -- Your SQL goes here
+
 CREATE TABLE clients (
-  id INT(11) PRIMARY KEY AUTO_INCREMENT,
+  id INTEGER PRIMARY KEY AUTO_INCREMENT ,
   pseudo VARCHAR(60) NOT NULL,
   password VARCHAR(255) NOT NULL,
   email VARCHAR(60) NOT NULL
-)
+);

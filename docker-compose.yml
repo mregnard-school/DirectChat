@@ -10,11 +10,10 @@ services:
     links:
         - db
     ports:
-      - 8000:80
+      - "8000:8000"
     volumes:
-    - ./server:/usr/src/app
-    - ./server/registry:/root/.cargo/registry
-    env_file: server/.env
+    - ./server/src:/server/src
+    env_file: ./server/.env
     networks:
         - app
   db:
@@ -25,11 +24,10 @@ services:
     networks:
         - app
     environment:
-      MYSQL_DATABASE: clients
+      MYSQL_DATABASE: server
       MYSQL_ROOT_PASSWORD: secret
-      MYSQL_USER: root
+      MYSQL_USER: user
       MYSQL_PASSWORD: secret
-      MYSQL_HOST: db
 
 networks:
   app:

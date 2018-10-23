@@ -53,7 +53,6 @@
     created() {
       this.node.setOnReceiveData(this.onReceiveData);
       this.node.setOnNewConnection(this.onNewConnection);
-      localStore.delete(this.storeFile);
       this.chatrooms = localStore.get(this.storeFile) || [];
 
       this.chatrooms.length===0 ? console.log('no conv') : console.log('yes conv');

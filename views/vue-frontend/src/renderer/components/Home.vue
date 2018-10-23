@@ -4,8 +4,14 @@
       Hello {{this.client.pseudo}} !
     </div>
 
-    <div v-for="friend in friends">
-      {{friend}}
+    <div v-for="friend in friends" class="friends">
+      Friends lists :
+      <div class="friend-info">{{friend.pseudo}}
+        <div v-if="friend.isConnected" class="connected">
+          Connected ! <!-- todo change this with icon or smthg better-->
+        </div>
+      </div>
+
     </div>
 
     <chatroom-home/>
@@ -39,6 +45,7 @@
       }
 
       this.node.setOnNewConnection(this.onNewConnection);
+      this.node.setOnEndConnection(this.onEndConnection);
 
     },
     computed: {
@@ -62,12 +69,40 @@
           }
         }
         this.connected.push(socket.client);
+      },
+      onEndConnection(socket) {
+        socket.client.ips = [];
+        socket.client.isConnected = false;
+        for (let i = 0; i < this.connected.length; i++) {
+          let client = this.connected[i];
+          if(client.id === socket.client.id) {
+            this.connected.splice(i, 1);
+          }
+        }
+
+        this.disconnected.push(socket.client);
       }
     }
   }
 
 </script>
 
-<style scoped>
+<style lang="scss">
+.home {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
 
+  .friends {
+    .friend-info {
+
+    }
+    .active {
+
+    }
+  }
+}
 </style>

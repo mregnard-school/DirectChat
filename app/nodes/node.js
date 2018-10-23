@@ -67,7 +67,7 @@ class Node {
     handler.setCallbackHandler(this.callbackHandler)
         .setOnConnectionClose((socket) => {
           this.sockets = this.sockets.filter(sock => sock !== socket);
-          this.onEndConnection()
+          this.onEndConnection(socket)
         })
         .setOnError((error) => {
           if (reject) {

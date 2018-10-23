@@ -52,18 +52,19 @@
     },
     methods: {
       toggleChangingName() {
-        this.changingName = !this.changingName;
-        if (!this.changingName) { //Check if new name is different than old one
-          let message = this.constructMessage(
-              store.state.peer.client.pseudo + ' renamed the conversation to '
-              + this.conversation.name);
-          message = {
-            ...message,
-            type: types.nameChange,
-          };
-          console.log("Writing message for new name");
-          console.log(message);
-          this.writeMessageToAll(message);
+        if (this.conversation.name != '') {
+          this.changingName = !this.changingName;
+          if (!this.changingName) { //Check if new name is different than old one
+            let message = this.constructMessage(
+                store.state.peer.client.pseudo + ' renamed the conversation to '
+                + this.conversation.name
+            );
+            message = {
+              ...message,
+              type: types.nameChange,
+            };
+            this.writeMessageToAll(message);
+          }
         }
       },
       onReceiveData(data) {

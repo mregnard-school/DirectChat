@@ -55,9 +55,6 @@
       this.node.setOnReceiveData(this.onReceiveData);
       this.node.setOnNewConnection(this.onNewConnection);
       this.chatrooms = localStore.get(this.storeFile) || [];
-
-      this.chatrooms.length===0 ? console.log('no conv') : console.log('yes conv');
-
       this.chatrooms.forEach(wrapper => {
         wrapper.component = Chatroom;
       })
@@ -74,13 +71,10 @@
         }
       },
       onNewConnection(socket) {
-        console.log("New connection :D");
-        console.log(socket.client);
         this.peer.handleFriendConnection(socket.client);
         //Alert user here with something visual
       },
       save() {
-        console.log('saving');
         localStore.set(this.storeFile, this.chatrooms);
       },
       newChatroom(pseudos) {

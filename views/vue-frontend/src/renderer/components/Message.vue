@@ -16,7 +16,6 @@
 <script>
 
   import types from '@/messageTypes';
-  console.log(types);
 
   export default {
     name: "Message",
@@ -25,12 +24,8 @@
         type: Object,
       }
     },
-    mounted() {
-      console.log(this.message);
-    },
     computed: {
       isInformational() {
-        console.log(this.message.type);
         return this.message.type && (this.message.type === types.information);
       },
       isChangingName() {

@@ -17,6 +17,8 @@
                  v-bind="activeProperties"
                  :key="activeChatroom.id"
                  v-on:new-chatroom="newChatroom"
+                 v-on:new-message="newMessage"
+                 class="selected-chatroom"
       />
     </keep-alive>
   </div>
@@ -28,9 +30,11 @@
   import NewChatroom from 'components/NewChatroom';
   import ChatroomThumbnail from 'components/ChatroomThumbnail';
   import store from '@/mutableStore';
+  import Store from 'electron-store';
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';
-  import {parseIpAndPortFromString} from 'p2p/services/util';
+
+  const localStore = new Store();
 
   export default {
     name: "Home",
@@ -45,20 +49,14 @@
         selectedChatroom: null,
       }
     },
-    mounted() {
-      store.state.peer.setOnNewConnection(this.onNewConnection);
-      const port = parseIpAndPortFromString(this.client.ips[0]).port;
-      store.state.peer.runServer(port);
+    created() {
       this.node.setOnReceiveData(this.onReceiveData);
-      this.client.friends.forEach(friend => {
-        if(friend.ips.length !== 0) {
-          friend.ips.forEach(ipPort => {
-            const parsed = parseIpAndPortFromString(ipPort);
-            console.log(parsed);
-            this.node.connectTo(parsed.ip, parsed.port);
-          })
-        }
-      });
+      this.chatrooms = localStore.get("user-chatrooms") || [];
+
+      this.chatrooms.forEach(wrapper => {
+        wrapper.component = Chatroom;
+        console.log(wrapper.conversation);
+      })
     },
     methods: {
       handleNewConversation() {
@@ -68,21 +66,24 @@
         }
       },
       onNewConnection(socket) {
-       //todo Handle Machin is connected here
+        //todo Handle Machin is connected here
 
+      },
+      newMessage() {
+        localStore.set('user-chatrooms', this.chatrooms);
       },
       newChatroom(pseudos) {
         let friends = [];
         this.client.friends.forEach(friend => {
-          if(pseudos.includes(friend.pseudo)) {
+          if (pseudos.includes(friend.pseudo)) {
             friends.push(friend);
           }
         });
-        if(friends.length > 0) {
+        if (friends.length > 0) {
           let friendsAndMe = friends.concat([this.client]);
           const createdMessageToSend = {
             id: 0,
-            conversation : {
+            conversation: {
               id: 0,
               name: this.client.pseudo,
               friends: friendsAndMe,
@@ -103,12 +104,12 @@
           };
 
           const conversation = this.createConversationWithWrapper(messageForMyslef);
-          conversation.messages.push(messageForMyslef);
+          this.addAndSaveChatroom(conversation, messageForMyslef);
         }
       },
       sendToAll(friends, message) {
         friends.forEach(friend => {
-          if(friend.id !== this.client.id) {
+          if (friend.id !== this.client.id) {
             this.node.writeMessageTo(friend, message);
           }
         });
@@ -131,19 +132,23 @@
           component: Chatroom,
         };
 
-        this.chatrooms.push(conversationWrapper)
+        this.chatrooms.push(conversationWrapper);
         return conversation;
       },
-      onReceiveData(data){
+      onReceiveData(data) {
         const message = JSON.parse(data);
         let conversation_id = message.conversation.id;
-        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find((conv) => conv.id === conversation_id);
+        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find(
+            (conv) => conv.id === conversation_id);
 
-        if(!conversation) {
+        if (!conversation) {
           conversation = this.createConversationWithWrapper(message);
         }
-
-        conversation.messages.push(message);
+        this.addAndSaveChatroom(conversation, message);
+      },
+      addAndSaveChatroom(chatroom, message) {
+        chatroom.messages.push(message);
+        localStore.set('user-chatrooms', this.chatrooms);
       },
       changeChatroom(chatroom) {
         let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
@@ -158,14 +163,14 @@
         return store.state.peer.node;
       },
       activeComponent() {
-        if(this.selectedChatroom) {
+        if (this.selectedChatroom) {
           return this.selectedChatroom.component;
         }
 
         return null
       },
       activeProperties() {
-        if(this.selectedChatroom) {
+        if (this.selectedChatroom) {
           return {
             conversation: this.selectedChatroom.conversation
           }
@@ -174,7 +179,7 @@
 
       },
       activeChatroom() {
-        if(this.selectedChatroom) {
+        if (this.selectedChatroom) {
           return this.selectedChatroom.conversation
         }
 

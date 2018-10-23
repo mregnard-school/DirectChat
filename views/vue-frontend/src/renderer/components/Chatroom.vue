@@ -62,8 +62,6 @@
           this.writeMessageToAll(this.messageToSend);
           this.messageToSend = '';
         }
-
-
       },
       writeMessageToAll(content) {
         const message = {
@@ -84,6 +82,7 @@
           }
         });
         this.conversation.messages.push(message);
+        this.$emit('new-message');
       },
       writeMessageTo(friend, message) {
         store.state.peer.node.writeMessageTo(friend, message);

@@ -9,8 +9,6 @@ class Client {
     this.node = new Node(client);
   }
   
-  
-  
   mapFriendsToIPs(friends) {
     friends.forEach((friend) => {
       friend.ips.forEach(ip => {
@@ -28,6 +26,16 @@ class Client {
     this.ipTable.forEach((key, value) => {
       this.node.connectTo(value.ip, value.port);
     });
+  }
+  
+  getFriendsWithPseudos(pseudos) {
+    let friends = [];
+    this.client.friends.forEach(friend => {
+      if (pseudos.includes(friend.pseudo)) {
+        friends.push(friend);
+      }
+    });
+    return friends;
   }
   
   runServer(port) {

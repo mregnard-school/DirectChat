@@ -1,6 +1,8 @@
 <template>
   <div class="home">
-    connected as {{this.client.pseudo}}
+    <div class="informations">
+      Hello {{this.client.pseudo}} !
+    </div>
     <div class="chatroom-thumbnails">
       <div class="chatroom-thumbnail" v-for="wrapper in chatrooms">
         <chatroom-thumbnail v-bind:chatroom="wrapper.conversation"
@@ -10,7 +12,6 @@
         <button class="new-conversation" @click="handleNewConversation">New Conversation</button>
       </div>
     </div>
-
 
     <keep-alive>
       <component :is="activeComponent"
@@ -55,10 +56,13 @@
 
       this.chatrooms.forEach(wrapper => {
         wrapper.component = Chatroom;
-        console.log(wrapper.conversation);
       })
     },
     methods: {
+      changeChatroom(chatroom) {
+        let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
+        this.selectedChatroom = wrapper;
+      },
       handleNewConversation() {
         this.selectedChatroom = {
           conversation: {},
@@ -73,39 +77,35 @@
         localStore.set('user-chatrooms', this.chatrooms);
       },
       newChatroom(pseudos) {
-        let friends = [];
-        this.client.friends.forEach(friend => {
-          if (pseudos.includes(friend.pseudo)) {
-            friends.push(friend);
-          }
-        });
+        let friends = this.client.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
           let friendsAndMe = friends.concat([this.client]);
-          const createdMessageToSend = {
+          const messageTempalte = {
             id: 0,
-            conversation: {
-              id: 0,
-              name: this.client.pseudo,
-              friends: friendsAndMe,
-            },
+            conversation: {id: 0, name: "", friends: friendsAndMe,},
             type: "informational",
-            content: "Chat with " + this.client.pseudo + " created !"
-          };
-          this.sendToAll(friends, createdMessageToSend);
-          const name = pseudos.join(", ");
-          const messageForMyslef = {
-            id: 0,
-            type: "informational",
-            conversation: {
-              name: name,
-              friends: friendsAndMe,
-            },
-            content: "Chat with " + name + " created",
+            content: "Chat with {0} created ! "
           };
 
-          const conversation = this.createConversationWithWrapper(messageForMyslef);
-          this.addAndSaveChatroom(conversation, messageForMyslef);
+          this.createAndSendChatroomCreationMessage(messageTempalte, friends, this.client.pseudo);
+          const name = pseudos.join(", ");
+          const messageForMyself = this.createMessage(messageTempalte, name);
+
+          const conversation = this.createConversationWithWrapper(messageForMyself);
+          this.addAndSaveChatroom(conversation, messageForMyself);
         }
+      },
+      createAndSendChatroomCreationMessage(messageTemplate, friends, name) {
+        const createdMessageToSend = this.createMessage(messageTemplate, name);
+        this.sendToAll(friends, createdMessageToSend);
+      },
+      createMessage(messageTemplate, chatroomName) {
+        const createdMessage = {
+          ...messageTemplate,
+        };
+        createdMessage.conversation.name = chatroomName
+        createdMessage.content = messageTemplate.content.format(chatroomName);
+        return createdMessage
       },
       sendToAll(friends, message) {
         friends.forEach(friend => {
@@ -138,9 +138,8 @@
       onReceiveData(data) {
         const message = JSON.parse(data);
         let conversation_id = message.conversation.id;
-        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation).find(
-            (conv) => conv.id === conversation_id);
-
+        let conversation = this.chatrooms.map((wrapper) => wrapper.conversation)
+            .find((conv) => conv.id === conversation_id);
         if (!conversation) {
           conversation = this.createConversationWithWrapper(message);
         }
@@ -148,19 +147,18 @@
       },
       addAndSaveChatroom(chatroom, message) {
         chatroom.messages.push(message);
-        localStore.set('user-chatrooms', this.chatrooms);
+        this.newMessage();
       },
-      changeChatroom(chatroom) {
-        let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
-        this.selectedChatroom = wrapper;
-      }
     },
     computed: {
       client() {
-        return store.state.peer.client;
+        return this.peer.client
       },
       node() {
-        return store.state.peer.node;
+        return this.peer.node;
+      },
+      peer() {
+        return store.state.peer;
       },
       activeComponent() {
         if (this.selectedChatroom) {

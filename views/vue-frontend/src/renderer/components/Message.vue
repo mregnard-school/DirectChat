@@ -6,7 +6,7 @@
     <div v-else-if="isChangingName" class="name-changing">
       {{message.content}}
     </div>
-    <div v-else>
+    <div v-else class="">
       {{message.author.pseudo}} > {{message.content}}
     </div>
 
@@ -14,6 +14,10 @@
 </template>
 
 <script>
+
+  import types from '@/messageTypes';
+  console.log(types);
+
   export default {
     name: "Message",
     props: {
@@ -21,12 +25,16 @@
         type: Object,
       }
     },
+    mounted() {
+      console.log(this.message);
+    },
     computed: {
       isInformational() {
-        return this.message.type === "informational";
+        console.log(this.message.type);
+        return this.message.type && (this.message.type === types.information);
       },
       isChangingName() {
-        return this.message.type === "name-changing"
+        return this.message.type && (this.message.type === types.nameChange);
       }
     }
   }

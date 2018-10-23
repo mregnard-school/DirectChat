@@ -34,6 +34,7 @@
   import Store from 'electron-store';
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';
+  import types from '@/messageTypes';
 
   const localStore = new Store();
 
@@ -73,6 +74,8 @@
         }
       },
       onNewConnection(socket) {
+        console.log("New connection :D");
+        console.log(socket.client);
         this.peer.handleFriendConnection(socket.client);
         //Alert user here with something visual
       },
@@ -87,7 +90,7 @@
           const messageTempalte = {
             id: 0,
             conversation: {id: 0, name: "", friends: friendsAndMe,},
-            type: "informational",
+            type: types.information,
             content: "Chat with {0} created ! "
           };
 
@@ -148,7 +151,7 @@
           conversation = this.createConversationWithWrapper(message);
         }
 
-        if(message.type === "name-changing") {
+        if(message.type === types.nameChange) {
           conversation.name = message.conversation.name;
         }
 

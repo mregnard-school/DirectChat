@@ -27,6 +27,7 @@
   import Client from 'p2p/client/client';
   import Message from 'components/Message';
   import store from '@/mutableStore';
+  import types from '@/messageTypes';
   import moment from 'moment';
 
   export default {
@@ -52,9 +53,16 @@
     methods: {
       toggleChangingName() {
         this.changingName = !this.changingName;
-        if(!this.changingName) { //Check if new name is different than old one
-          let message = this.constructMessage(store.state .peer.client.pseudo + ' renamed the conversation to ' + this.conversation.name);
-          message.type = "name-changing"; // TODO irindul 2018-10-23 : Put types in json
+        if (!this.changingName) { //Check if new name is different than old one
+          let message = this.constructMessage(
+              store.state.peer.client.pseudo + ' renamed the conversation to '
+              + this.conversation.name);
+          message = {
+            ...message,
+            type: types.nameChange,
+          };
+          console.log("Writing message for new name");
+          console.log(message);
           this.writeMessageToAll(message);
         }
       },
@@ -62,14 +70,14 @@
         this.addNewMessage(data);
       },
       sendMessage() {
-        if(this.messageToSend !== '') {
+        if (this.messageToSend !== '') {
           this.constructAndWriteMessageToAll(this.messageToSend);
           this.messageToSend = '';
         }
       },
       constructMessage(content) {
         return {
-          id: this.conversation.messages.length+1, //Maybe change with unique id (SHA-256 of content + date)
+          id: this.conversation.messages.length + 1, //Maybe change with unique id (SHA-256 of content + date)
           conversation: {
             id: this.conversation.id,
             name: this.conversation.name,
@@ -89,7 +97,7 @@
       },
       writeMessageToAll(message) {
         this.conversation.friends.forEach(friend => {
-          if(friend.id !== store.state.peer.client.id) {
+          if (friend.id !== store.state.peer.client.id) {
             this.writeMessageTo(friend, message);
           }
         });
@@ -110,6 +118,7 @@
 
 <style lang="scss">
   @import '~styles/global';
+
   .chatroom {
     position: relative;
     display: flex;

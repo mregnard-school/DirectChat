@@ -1,12 +1,11 @@
 use diesel;
 use diesel::prelude::*;
 use diesel::mysql::MysqlConnection;
-use super::schema::{clients};
+use super::schema::clients;
 
-#[table_name = "clients"]
-#[derive(Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Serialize, Deserialize, Queryable)]
 pub struct Client {
-    pub id: Option<i32>,
+    pub id: i32,
     pub pseudo: String,
     pub password: String,
     pub email: String
@@ -14,26 +13,52 @@ pub struct Client {
     // pub ips: Vec<String>
 }
 
-impl Client {
-    pub fn create(client: Client, connection: &MysqlConnection) -> Client {
-        diesel::insert_into(clients::table)
-            .values(&client)
-            .execute(connection)
-            .expect("Error creating new client");
+ impl Client {
+     pub fn create(client: Client, connection: &MysqlConnection) -> Client {
+         diesel::insert_into(clients::table)
+             .values(&InsertableClient::from_client(client))
+             .execute(connection);
+         Post::belonging_to(client).load(&connection).unwrap()
+     }
 
-        clients::table.order(clients::id.desc()).first(connection).unwrap()
-    }
+     pub fn read(connection: &MysqlConnection) -> Vec<Client> {
+         clients::table
+             .order(clients::id.asc())
+             .load::<Client>(connection)
+             .unwrap()
+     }
 
-    pub fn read(connection: &MysqlConnection) -> Vec<Client> {
-        clients::table.order(clients::id.asc()).load::<Client>(connection).unwrap()
-    }
+     pub fn update(id: i32, client: Client, connection: &MysqlConnection) -> Client {
+         diesel::update(clients::table.find(id))
+             .set(&client)
+             .execute(connection);
+         Post::belonging_to(client)
+             .load(&connection)
+             .unwrap()
 
-    pub fn update(id: i32, client: Client, connection: &MysqlConnection) -> bool {
-        // diesel::update(clients::table.find(id)).set(&client).execute(connection).is_ok()
-        false
-    }
+     }
 
-    pub fn delete(id: i32, connection: &MysqlConnection) -> bool {
-        diesel::delete(clients::table.find(id)).execute(connection).is_ok()
-    }
-}
+     pub fn delete(id: i32, connection: &MysqlConnection) -> usize {
+         diesel::delete(clients::table.find(id))
+             .execute(connection)
+             .unwrap()
+     }
+ }
+
+// #[derive(Serialize, Deserialize, Insertable)]
+// #[table_name = "clients"]
+// pub struct InsertableClient {
+//     pub pseudo: String,
+//     pub password: String,
+//     pub email: String
+// }
+//
+// impl InsertableClient {
+//     fn from_client(client: Client) -> InsertableClient {
+//         InsertableClient {
+//             pseudo: client.pseudo,
+//             password: client.password,
+//             email: client.email
+//         }
+//     }
+// }

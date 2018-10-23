@@ -5,8 +5,9 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: cargo run
     depends_on:
+        - db
+    links:
         - db
     ports:
       - 8000:80
@@ -24,10 +25,11 @@ services:
     networks:
         - app
     environment:
-      MYSQL_DATABASE: client
+      MYSQL_DATABASE: clients
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_USER: root
       MYSQL_PASSWORD: secret
+      MYSQL_HOST: db
 
 networks:
   app:

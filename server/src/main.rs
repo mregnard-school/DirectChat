@@ -1,15 +1,18 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-extern crate rocket;
-#[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate serde_derive;
-extern crate dotenv;
-
 //For db
-#[macro_use] extern crate diesel;
+#[macro_use]
+extern crate diesel;
 extern crate r2d2;
 extern crate r2d2_diesel;
+
+extern crate serde_derive;
+extern crate serde;
+extern crate dotenv;
+
+extern crate rocket;
+extern crate rocket_contrib;
 
 mod db;
 pub mod schema;
@@ -30,9 +33,9 @@ fn read(connection: db::Connection) -> Json<Value> {
     Json(json!(Client::read(&connection)))
 }
 
-#[put("/<id>", data = "<client>")]
-fn update(id: i32, client: Json<Client>, connection: db::Connection) -> Json<Value> {
-    let update = Client { id: Some(id), ..client.into_inner() };
+#[put("/<_id>", data = "<client>")]
+fn update(_id: i32, client: Json<Client>, connection: db::Connection) -> Json<Value> {
+    let update = Client { id: _id, ..client.into_inner() };
     Json(json!({
         "success": Client::update(id, update, &connection)
     }))

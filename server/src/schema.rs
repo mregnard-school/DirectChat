@@ -1,6 +1,6 @@
 table! {
     clients (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         pseudo -> Varchar,
         password -> Varchar,
         email -> Varchar,

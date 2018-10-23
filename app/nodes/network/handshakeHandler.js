@@ -1,4 +1,4 @@
-const handshakeInfo = 'handshake ';
+const handshakeInfo = 'handshake';
 
 class HandshakeHandler {
   constructor(socket, client) {
@@ -8,10 +8,17 @@ class HandshakeHandler {
   }
   
   handleData(data, callbackHandler, resolve) {
-    if(!this.handshaked && data.includes(handshakeInfo)) {
-      this.handleHandshake(data);
-      if(resolve) {
-        resolve();
+    if (!this.handshaked) {
+      try {
+        const dataObj = JSON.parse(data);
+        if (dataObj.type === handshakeInfo) {
+          this.handleHandshake(dataObj);
+          if (resolve) {
+            resolve();
+          }
+        }
+      } catch (e) {
+        //Do not handle message if no handshake has been made
       }
     } else {
       let callback = callbackHandler.getCallback();
@@ -21,26 +28,33 @@ class HandshakeHandler {
   
   handleHandshake(data) {
     this.socket.client = HandshakeHandler.parseClientFromHandshake(data);
+    console.log(this.socket.client);
     this.handshaked = true;
   }
   
   static parseClientFromHandshake(data) {
-    let parts = data.split(' ');
-    let id = Number(parts[1]);
-    let pseudo = parts[2];
-    return {
-      "id": id,
-      "pseudo": pseudo,
-    };
+   return data.friend;
   }
   
   writeHandshake() {
-    console.log('writing handshake');
     this.socket.write(this.buildHandshakeMessage());
   }
   
   buildHandshakeMessage() {
-    return handshakeInfo + this.client.id + ' ' + this.client.pseudo + '\n';
+    const message = {
+      type: 'handshake',
+      friend: this.getClientWithoutFriends(),
+    };
+    
+    return JSON.stringify(message);
+  }
+  
+  getClientWithoutFriends() {
+    return {
+      id: this.client.id,
+      pseudo: this.client.pseudo,
+      ips: this.client.ips,
+    }
   }
 }
 

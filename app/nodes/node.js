@@ -45,7 +45,6 @@ class Node {
   
   setOnNewConnection(onNewConnection) {
     this.onNewConnection = (socket) => {
-      console.log('connected');
       onNewConnection(socket);
     };
     return this;
@@ -53,7 +52,6 @@ class Node {
   
   runServer(port) {
     this.serverSocket = net.createServer((socket) => {
-      console.log('accepted');
       this.sockets.push(socket);
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
@@ -68,7 +66,6 @@ class Node {
   initializeConnectionHandler(handler, resolve, reject) {
     handler.setCallbackHandler(this.callbackHandler)
         .setOnConnectionClose((socket) => {
-          console.log('Removing socket');
           this.sockets = this.sockets.filter(sock => sock !== socket);
           this.onEndConnection()
         })
@@ -78,7 +75,6 @@ class Node {
           }
           else {
             console.log('Server already running, not restarting');
-            //console.error(error);
           }
         })
         .handleOnConnection(resolve);
@@ -95,21 +91,7 @@ class Node {
     const socket = net.createConnection(port, ip);
     this.sockets.push(socket);
     const handler = new ClientHandler(socket, this.client);
-    this.initializeConnectionHandler(handler, () => {
-      console.log('handler initilization done');
-    })
-    
-    //return Promise.resolve();
-   // return new Promise((resolve, reject) => {
-      /*const clientSocket = net.createConnection({port: port, host: ip}, () => {
-        console.log('connected');
-        this.sockets.push(clientSocket);
-        const handler = new ClientHandler(clientSocket, this.client);
-        this.initializeConnectionHandler(handler, resolve, reject);
-      })*/
-      
-      
-   // });
+    this.initializeConnectionHandler(handler, () => {}, () => {});
   }
   
   writeRaw(client, message) {

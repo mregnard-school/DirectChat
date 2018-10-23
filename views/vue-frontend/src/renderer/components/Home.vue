@@ -18,7 +18,7 @@
                  v-bind="activeProperties"
                  :key="activeChatroom.id"
                  v-on:new-chatroom="newChatroom"
-                 v-on:new-message="newMessage"
+                 v-on:new-message="save"
                  class="selected-chatroom"
       />
     </keep-alive>
@@ -52,7 +52,11 @@
     },
     created() {
       this.node.setOnReceiveData(this.onReceiveData);
-      this.chatrooms = localStore.get("user-chatrooms") || [];
+      this.node.setOnNewConnection(this.onNewConnection);
+      localStore.delete(this.storeFile);
+      this.chatrooms = localStore.get(this.storeFile) || [];
+
+      this.chatrooms.length===0 ? console.log('no conv') : console.log('yes conv');
 
       this.chatrooms.forEach(wrapper => {
         wrapper.component = Chatroom;
@@ -70,14 +74,15 @@
         }
       },
       onNewConnection(socket) {
-        //todo Handle Machin is connected here
-
+        this.peer.handleFriendConnection(socket.client);
+        //Alert user here with something visual
       },
-      newMessage() {
-        localStore.set('user-chatrooms', this.chatrooms);
+      save() {
+        console.log('saving');
+        localStore.set(this.storeFile, this.chatrooms);
       },
       newChatroom(pseudos) {
-        let friends = this.client.getFriendsWithPseudos(pseudos);
+        let friends = this.peer.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
           let friendsAndMe = friends.concat([this.client]);
           const messageTempalte = {
@@ -147,10 +152,13 @@
       },
       addAndSaveChatroom(chatroom, message) {
         chatroom.messages.push(message);
-        this.newMessage();
+        this.save();
       },
     },
     computed: {
+      storeFile() {
+        return this.client.pseudo+'-chatroom';
+      },
       client() {
         return this.peer.client
       },

@@ -38,6 +38,11 @@ class Client {
     return friends;
   }
   
+  handleFriendConnection(friend) {
+    this.client.friends.filter(amigo => amigo.id === friend.id)
+        .forEach(amigo => amigo.ips.push(friend.ips))
+  }
+  
   runServer(port) {
     this.node.runServer(port);
   }

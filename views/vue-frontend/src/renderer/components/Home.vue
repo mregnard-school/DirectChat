@@ -147,6 +147,11 @@
         if (!conversation) {
           conversation = this.createConversationWithWrapper(message);
         }
+
+        if(message.type === "name-changing") {
+          conversation.name = message.conversation.name;
+        }
+
         this.addAndSaveChatroom(conversation, message);
       },
       addAndSaveChatroom(chatroom, message) {

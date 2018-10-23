@@ -52,22 +52,28 @@
     methods: {
       toggleChangingName() {
         this.changingName = !this.changingName;
-        // TODO irindul 2018-10-22 : find a way to propagate change for all members of chat
+        if(!this.changingName) { //Check if new name is different than old one
+          let message = this.constructMessage(store.state .peer.client.pseudo + ' renamed the conversation to ' + this.conversation.name);
+          message.type = "name-changing"; // TODO irindul 2018-10-23 : Put types in json
+          this.writeMessageToAll(message);
+        }
       },
       onReceiveData(data) {
         this.addNewMessage(data);
       },
       sendMessage() {
         if(this.messageToSend !== '') {
-          this.writeMessageToAll(this.messageToSend);
+          this.constructAndWriteMessageToAll(this.messageToSend);
           this.messageToSend = '';
         }
       },
-      writeMessageToAll(content) {
-        const message = {
-          id: this.conversation.messages.length+1, // TODO irindul 2018-10-20 : Genererate id... (sha-256 of content + date(for unicity) is the best)
+      constructMessage(content) {
+        return {
+          id: this.conversation.messages.length+1, //Maybe change with unique id (SHA-256 of content + date)
           conversation: {
             id: this.conversation.id,
+            name: this.conversation.name,
+            friends: this.conversation.friends,
           },
           date: moment().format("YYYY-mm-DD HH:mm:ss"),
           author: {
@@ -76,6 +82,12 @@
           },
           content: content,
         };
+      },
+      constructAndWriteMessageToAll(content) {
+        const message = this.constructMessage(content);
+        this.writeMessageToAll(message);
+      },
+      writeMessageToAll(message) {
         this.conversation.friends.forEach(friend => {
           if(friend.id !== store.state.peer.client.id) {
             this.writeMessageTo(friend, message);

@@ -72,14 +72,14 @@ class MockWrapper {
             id: 2,
             pseudo: payload.pseudo,
             ips: [
-              "127.0.0.1:5000",
+              "127.0.0.1:5001",
             ],
             friends: [
               {
                 "id": 1,
                 "pseudo": "Billy",
                 ips: [
-                    "192.168.2.28:5000"
+                    "127.0.0.1:5000"
                 ],
               }
             ]

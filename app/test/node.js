@@ -70,7 +70,6 @@ describe("Node", () => {
     });
   });
   
-  // TODO irindul 2018-10-20 : Redo - Adapt to changes
   it("client should send a message to server", (done) => {
     const nodeServer = new Node(clients[0]);
     const nodeClient = new Node(clients[1]);

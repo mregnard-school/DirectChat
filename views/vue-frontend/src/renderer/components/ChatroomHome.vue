@@ -114,7 +114,7 @@
       },
       createConversation(message) {
         const conversation = {
-          'id': this.chatrooms.length + 1,// TODO irindul 2018-10-19 : Define id (maybe SHA-256 of all pseudos concatenated),
+          'id': this.chatrooms.length + 1,
           'name': message.conversation.name,
           'friends': message.conversation.friends || [],
           'messages': [],

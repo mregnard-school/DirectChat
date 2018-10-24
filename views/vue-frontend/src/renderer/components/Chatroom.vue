@@ -130,7 +130,7 @@
       flex: 1;
       h1 {
         font-family: $main-font;
-        font-size: Medium; // TODO irindul 2018-10-20 : Change with custom font-size
+        font-size: 10px;
       }
     }
 

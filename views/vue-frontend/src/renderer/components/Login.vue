@@ -7,8 +7,6 @@
     <input v-model="password" type="password" id="password"/>
 
     <button @click="login">Log in</button>
-
-    <!-- // TODO irindul 2018-10-20 : Add register -->
   </div>
 </template>
 

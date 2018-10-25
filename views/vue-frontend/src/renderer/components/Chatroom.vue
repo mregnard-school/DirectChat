@@ -105,7 +105,7 @@
         this.conversation.messages.push(message);
         this.$emit('new-message');
       },
-      writeMessageTo(friend, message) {
+      writeMessageTo(friend, message) { // TODO irindul 2018-10-25 : Handle not connected
         store.state.peer.node.writeMessageTo(friend, message);
       },
       addNewMessage(message) {

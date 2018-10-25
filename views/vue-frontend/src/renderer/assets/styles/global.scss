@@ -20,21 +20,19 @@ body {
 }
 
 label {
-  font-size: 15px;
   padding-bottom: 2px;
 }
 
 input {
   border-style: none;
   padding: 5px;
-  font-size: 16px;
-  max-width: 300px;
+
   border-radius: 7px;
   outline-width: 0;
-}
 
-input:focus {
-  box-shadow: 0 0 1px 1px $accentColor;
+  &:focus {
+    box-shadow: 0 0 1px 1px $accentColor;
+  }
 }
 
 button {
@@ -44,4 +42,9 @@ button {
   font-size: 15px;
   border-radius: 5px;
   display: block;
+
+  &:focus {
+    outline-width: 0px;
+    box-shadow: 0 0 2px 1px $accentColor;
+  }
 }

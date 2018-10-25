@@ -93,6 +93,15 @@
         flex-direction: column;
         color: $primaryText;
         margin-bottom: 15px;
+
+        input {
+          font-size: 16px;
+          max-width: 300px;
+        }
+
+        label {
+          font-size: 15px;
+        }
       }
 
       .login-submit {

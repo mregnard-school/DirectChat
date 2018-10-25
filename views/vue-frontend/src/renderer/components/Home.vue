@@ -1,20 +1,25 @@
 <template>
   <div class="home">
-    <div class="informations">
-      Hello {{this.client.pseudo}} !
+    <div class="information">
+      <h1>Hello {{this.client.pseudo}} !</h1>
     </div>
 
-    <div v-for="friend in friends" class="friends">
-      Friends lists :
-      <div class="friend-info">{{friend.pseudo}}
-        <div v-if="friend.isConnected" class="connected">
-          Connected ! <!-- todo change this with icon or smthg better-->
+    <div class="dashboard">
+      <chatroom-home class="chatroom"/>
+
+      <div v-for="friend in friends" class="friends"> <!--todo refact in own component-->
+        Friends lists :
+        <div class="friend-info">{{friend.pseudo}}
+          <div v-if="friend.isConnected" class="connected">
+            Connected ! <!-- todo change this with icon or smthg better-->
+          </div>
         </div>
       </div>
-
     </div>
 
-    <chatroom-home/>
+
+
+
   </div>
 </template>
 
@@ -22,6 +27,7 @@
 
   import ChatroomHome from 'components/ChatroomHome'
   import store from '@/mutableStore';
+
   export default {
     name: "Home",
     components: {
@@ -37,7 +43,7 @@
       this.disconnected = this.client.friends;
       for (let i = 0; i < this.disconnected.length; i++) {
         let client = this.disconnected[i];
-        if(client.ips.length > 0) {
+        if (client.ips.length > 0) {
           this.disconnected.splice(i, 1);
           client.isConnected = true;
           this.connected.push(client);
@@ -64,7 +70,7 @@
         socket.client.isConnected = true;
         for (let i = 0; i < this.disconnected.length; i++) {
           let client = this.disconnected[i];
-          if(client.id === socket.client.id) {
+          if (client.id === socket.client.id) {
             this.disconnected.splice(i, 1);
           }
         }
@@ -75,7 +81,7 @@
         socket.client.isConnected = false;
         for (let i = 0; i < this.connected.length; i++) {
           let client = this.connected[i];
-          if(client.id === socket.client.id) {
+          if (client.id === socket.client.id) {
             this.connected.splice(i, 1);
           }
         }
@@ -88,21 +94,40 @@
 </script>
 
 <style lang="scss">
-.home {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 10px;
+  @import '~styles/global';
 
-  .friends {
-    .friend-info {
+  .home {
+    display: flex;
+    flex-direction: column;
+    background: $primaryColor;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 
+    .information {
+      text-align: center;
+      flex: 1;
+      h1 {
+        font-size: 16px;
+        font-weight: 500;
+      }
     }
-    .active {
 
+    .dashboard {
+      flex: 99;
+      display: flex;
+      flex-direction: row;
+      border-top: 1px solid $dividerColor;
+
+      .chatroom {
+        flex: 4;
+      }
+      .friends {
+        flex: 1;
+      }
     }
+
   }
-}
 </style>

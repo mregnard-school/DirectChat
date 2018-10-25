@@ -1,6 +1,6 @@
 <template>
   <div class="thumbnail">
-    <div @click="select">
+    <div @click="select" class="thumbnail-info"> 
       {{chatroom.name}}
     </div>
   </div>
@@ -8,7 +8,7 @@
 
 <script>
   export default {
-    name: "ChatroomThumbnail",
+    name: "ChatroomThumbnail", // TODO irindul 2018-10-25 : Add last message in thubnail
     props: {
       chatroom: {
         type: Object,
@@ -22,6 +22,16 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss">
+  @import '~styles/global';
+  .thumbnail {
+    padding: 5px;
+    margin-top: 2px;
+    border-top: 1px solid $dividerColor;
+    text-align: center;
 
+    .thumbnail-info {
+
+    }
+  }
 </style>

@@ -1,13 +1,19 @@
 <template>
   <div class="chatroom-home">
+
     <div class="chatroom-thumbnails">
-      <div class="chatroom-thumbnail" v-for="wrapper in chatrooms">
-        <chatroom-thumbnail v-bind:chatroom="wrapper.conversation"
+      <div class="chatrooms-search">
+        <input type="text" placeholder="Search...">
+      </div>
+
+        <chatroom-thumbnail class="chatroom-thumbnail"
+                            v-for="wrapper in chatrooms"
+                            v-bind:chatroom="wrapper.conversation"
                             v-on:select-chatroom="changeChatroom"/>
-      </div>
-      <div>
-        <button class="new-conversation" @click="handleNewConversation">New Conversation</button>
-      </div>
+
+        <div>
+          <button class="fab" @click="handleNewConversation">+</button>
+        </div>
     </div>
 
     <keep-alive>
@@ -199,14 +205,42 @@
   @import '~styles/global';
 
   .chatroom-home {
-   // position: absolute;
-    //bottom: 0;
-    //top: 0;
-    //left: 0;
-    //right: 0;
-    padding: 2px;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
+
+    .chatroom-thumbnails {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid $dividerColor;
+      position: relative;
+      overflow: auto;
+
+      .chatrooms-search {
+        margin: 4px;
+      }
+      .chatroom-thumbnail {
+      }
+
+      .fab {
+        position: absolute;
+        bottom: 2%;
+        right: 3%;
+        border-radius: 100px;
+        height: 30px;
+        width: 30px;
+        font-size: 20px;
+      }
+    }
+
+    .selected-chatroom {
+      flex: 3;
+    }
+  }
+
+  /*.chatroom-home {
+    display: flex;
+    flex-direction: row;
     .chatroom-thumbnails {
       display: flex;
       flex-direction: column;
@@ -217,17 +251,12 @@
       padding-bottom: 5px;
       border-right: 1px solid $lightGrey;
       max-width: 100px;
-      .chatroom-thumbnail {
-        flex: 1;
-        border: 4px;
-        max-height: 20px;
-        border-bottom: 1px solid $lightGrey;
-      }
+
     }
 
     .selected-chatroom {
-      flex: 5;
+      flex: 3;
     }
 
-  }
+  }*/
 </style>

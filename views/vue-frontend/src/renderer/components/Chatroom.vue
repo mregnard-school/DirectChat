@@ -1,7 +1,7 @@
 <template>
   <div class="chatroom">
     <div class="header">
-      <div v-if="changingName">
+      <div v-if="changingName"> <!--todo Exit without change with escape -->
         <input v-model="conversation.name" type="text" v-on:keyup.enter="toggleChangingName"/>
       </div>
       <div v-else @click="toggleChangingName">
@@ -120,7 +120,7 @@
 <style lang="scss">
   @import '~styles/global';
 
-  .chatroom {
+  /*.chatroom {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -152,5 +152,5 @@
     .sendBox {
       flex: 1;
     }
-  }
+  }*/
 </style>

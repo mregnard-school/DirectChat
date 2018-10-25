@@ -5,7 +5,7 @@
     </div>
 
     <div class="dashboard">
-      <chatroom-home class="chatroom"/>
+      <chatroom-home class="chatrooms"/>
 
       <div v-for="friend in friends" class="friends"> <!--todo refact in own component-->
         Friends lists :
@@ -100,11 +100,7 @@
     display: flex;
     flex-direction: column;
     background: $primaryColor;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    height: 100%;
 
     .information {
       text-align: center;
@@ -121,7 +117,7 @@
       flex-direction: row;
       border-top: 1px solid $dividerColor;
 
-      .chatroom {
+      .chatrooms {
         flex: 4;
       }
       .friends {

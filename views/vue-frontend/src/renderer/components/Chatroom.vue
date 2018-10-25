@@ -9,16 +9,24 @@
       </div>
     </div>
 
-    <div ref="messagesDisplay" class="conversation">
-      <div v-for="message in conversation.messages">
-        <message v-bind:message="message"></message>
+    <div class="chatroom-container">
+      <div ref="messagesDisplay" class="conversation">
+        <div v-for="message in conversation.messages">
+          <message v-bind:message="message"></message>
+        </div>
       </div>
     </div>
 
+
     <div class="sendBox">
-      <label for="messageInput"></label>
-      <input type="text" id="messageInput" v-model="messageToSend" v-on:keyup.enter="sendMessage">
-      <button @click="sendMessage">Send</button>
+      <div class="sendBox-input">
+        <label for="messageInput"></label>
+        <input type="text" id="messageInput" v-model="messageToSend" v-on:keyup.enter="sendMessage">
+      </div>
+      <div>
+        <button @click="sendMessage">Send</button>
+      </div>
+
     </div>
   </div>
 </template>
@@ -120,6 +128,41 @@
 <style lang="scss">
   @import '~styles/global';
 
+  .chatroom {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    height: 100%;
+    .header {
+      flex: 1;
+      text-align: center;
+      h1 {
+        font-size: 17px;
+        font-weight: 600;
+      }
+    }
+
+    .chatroom-container {
+      flex: 8;
+      background: $primaryLightColor;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .sendBox {
+      flex: 2;
+      display: flex;
+      flex-direction: row;
+
+      .sendBox-input {
+        margin-right: 5px;
+      }
+
+      button {
+      }
+    }
+  }
   /*.chatroom {
     position: relative;
     display: flex;

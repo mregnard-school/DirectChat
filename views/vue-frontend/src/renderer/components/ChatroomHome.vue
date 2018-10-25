@@ -16,15 +16,17 @@
         </div>
     </div>
 
-    <keep-alive>
-      <component :is="activeComponent"
-                 v-bind="activeProperties"
-                 :key="activeChatroom.id"
-                 v-on:new-chatroom="newChatroom"
-                 v-on:new-message="save"
-                 class="selected-chatroom"
-      />
-    </keep-alive>
+    <div class="selected-chatroom">
+      <keep-alive>
+        <component :is="activeComponent"
+                   v-bind="activeProperties"
+                   :key="activeChatroom.id"
+                   v-on:new-chatroom="newChatroom"
+                   v-on:new-message="save"
+        />
+      </keep-alive>
+    </div>
+
   </div>
 </template>
 
@@ -206,7 +208,9 @@
 
   .chatroom-home {
     display: flex;
+    height: 100%;
     flex-direction: row;
+    border-right: 1px solid $dividerColor;
 
     .chatroom-thumbnails {
       flex: 1;
@@ -237,26 +241,4 @@
       flex: 3;
     }
   }
-
-  /*.chatroom-home {
-    display: flex;
-    flex-direction: row;
-    .chatroom-thumbnails {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      border-radius: 2px;
-      padding-top: 5px;
-      padding-left: 5px;
-      padding-bottom: 5px;
-      border-right: 1px solid $lightGrey;
-      max-width: 100px;
-
-    }
-
-    .selected-chatroom {
-      flex: 3;
-    }
-
-  }*/
 </style>

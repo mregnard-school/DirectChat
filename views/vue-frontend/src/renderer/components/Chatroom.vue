@@ -1,8 +1,12 @@
 <template>
   <div class="chatroom">
     <div class="header">
-      <div v-if="changingName"> <!--todo Exit without change with escape -->
-        <input v-model="conversation.name" type="text" v-on:keyup.enter="toggleChangingName"/>
+      <div v-if="changingName">
+        <input v-model="name" type="text"
+               ref="name"
+               v-on:keyup.enter="toggleChangingName"
+               v-on:keyup.esc="cancel"
+        />
       </div>
       <div v-else @click="toggleChangingName">
         <h1>{{conversation.name}}</h1>
@@ -12,10 +16,8 @@
     <div class="chatroom-container">
       <div ref="messagesDisplay" class="conversation">
         <div v-for="message in conversation.messages">
-          <message
-                   v-bind:message="message" />
+          <message v-bind:message="message" />
         </div>
-
       </div>
     </div>
 
@@ -52,27 +54,44 @@
     },
     data() {
       return {
+        name: '',
         messageToSend: '',
         changingName: false,
       }
     },
     mounted() {
-      this.name = this.name === '' ? this.conversation.friend.pseudo : this.name;
-
+      this.name = this.conversation.name;
+    },
+    computed: {
+      nameHasChanged() {
+        console.log(this.name !== this.conversation.name);
+        return this.name !== this.conversation.name;
+      }
     },
     methods: {
+      cancel() {
+        if(this.changingName) {
+          this.changingName = false;
+        }
+      },
       toggleChangingName() {
-        if (this.conversation.name != '') {
+        if (this.name !== '') {
           this.changingName = !this.changingName;
-          if (!this.changingName) { //Check if new name is different than old one
+          if(this.changingName) {
+            //Focus on input component so we can start to write right away
+            //Doesn't work without nextTick()
+            this.$nextTick(() => this.$refs.name.focus());
+          }
+          if (!this.changingName && this.nameHasChanged) {
             let message = this.constructMessage(
-                store.state.peer.client.pseudo + ' renamed the conversation to '
-                + this.conversation.name
+                store.state.peer.client.pseudo + ' renamed the conversation to ' + this.name,
             );
             message = {
               ...message,
               type: types.nameChange,
             };
+            message.conversation.name = this.name;
+            this.conversation.name = this.name;
             this.writeMessageToAll(message);
           }
         }
@@ -123,7 +142,7 @@
         let messagesDisplay = this.$refs.messagesDisplay;
         messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
       }
-    }
+    },
   }
 </script>
 

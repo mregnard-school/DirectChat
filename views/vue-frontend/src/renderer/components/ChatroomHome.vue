@@ -155,6 +155,7 @@
         }
 
         if(message.type === types.nameChange) {
+          console.log(message.conversation.name);
           conversation.name = message.conversation.name;
         }
 

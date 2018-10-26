@@ -31,7 +31,6 @@ class Client {
   getFriendsWithPseudos(pseudos) {
     let friends = [];
     this.client.friends.forEach(friend => {
-      console.log(friend);
       if (pseudos.includes(friend.pseudo)) {
         friends.push(friend);
       }

@@ -28,7 +28,6 @@ class HandshakeHandler {
   
   handleHandshake(data) {
     this.socket.client = HandshakeHandler.parseClientFromHandshake(data);
-    console.log(this.socket.client);
     this.handshaked = true;
   }
   

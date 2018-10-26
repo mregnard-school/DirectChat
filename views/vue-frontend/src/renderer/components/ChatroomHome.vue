@@ -87,7 +87,6 @@
       newChatroom(pseudos) {
         let friends = this.peer.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
-          console.log('friends');
           let friendsAndMe = friends.concat([this.client]);
           const messageTempalte = {
             id: 0,
@@ -100,7 +99,7 @@
           const name = pseudos.join(", ");
           const messageForMyself = this.createMessage(messageTempalte, name);
 
-          const conversation = this.createConversationWithWrapper(messageForMyself);
+          const conversation = this.createConversationWithWrapper(messageForMyself, true);
           this.addAndSaveChatroom(conversation, messageForMyself);
         }
       },
@@ -133,7 +132,7 @@
 
         return conversation;
       },
-      createConversationWithWrapper(message) {
+      createConversationWithWrapper(message, setCurrent) {
         const conversation = this.createConversation(message);
 
         let conversationWrapper = {
@@ -142,7 +141,9 @@
         };
 
         this.chatrooms.push(conversationWrapper);
-        console.log(this.chatrooms.length)
+        if(setCurrent) {
+          this.selectedChatroom = conversationWrapper;
+        }
         return conversation;
       },
       onReceiveData(data) {
@@ -155,7 +156,6 @@
         }
 
         if(message.type === types.nameChange) {
-          console.log(message.conversation.name);
           conversation.name = message.conversation.name;
         }
 

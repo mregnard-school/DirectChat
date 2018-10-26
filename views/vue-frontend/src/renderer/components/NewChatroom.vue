@@ -1,8 +1,14 @@
 <template>
   <div class="new-chatroom">
-    <label for="friends">With whom ?</label>
-    <input type="text" id="friends" v-model="pseudo">
-    <button @click="submit">Create</button>
+    <div class="input">
+      <label for="friends">With whom ?</label>
+      <input type="text" id="friends" v-model="pseudo" v-on:keyup.enter="submit">
+    </div>
+
+    <div class="submit">
+      <button @click="submit">Create</button>
+    </div>
+
   </div>
 </template>
 
@@ -24,6 +30,18 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss">
+  @import '~styles/global';
+  .new-chatroom {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    .input {
+      font-size: 14px;
+    }
 
+    .submit {
+      margin-top: 10px;
+    }
+  }
 </style>

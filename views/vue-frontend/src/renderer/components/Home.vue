@@ -54,11 +54,6 @@
       this.node.setOnEndConnection(this.onEndConnection);
 
     },
-    watch: {
-      dicsonnected() {
-        console.log("disconnected changed");
-      }
-    },
     computed: {
       friends() {
         return this.connected.concat(this.disconnected);

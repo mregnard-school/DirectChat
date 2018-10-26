@@ -64,7 +64,6 @@
     },
     computed: {
       nameHasChanged() {
-        console.log(this.name !== this.conversation.name);
         return this.name !== this.conversation.name;
       }
     },

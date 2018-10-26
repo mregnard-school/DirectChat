@@ -12,8 +12,10 @@
     <div class="chatroom-container">
       <div ref="messagesDisplay" class="conversation">
         <div v-for="message in conversation.messages">
-          <message v-bind:message="message"></message>
+          <message
+                   v-bind:message="message" />
         </div>
+
       </div>
     </div>
 
@@ -132,7 +134,7 @@
     display: flex;
     flex-direction: column;
     padding: 5px;
-    height: 100%;
+    height: 90%;
     .header {
       flex: 1;
       text-align: center;
@@ -148,6 +150,12 @@
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 10px;
+      max-height: 80%;
+
+      .conversation {
+        overflow: auto;
+        max-height: 100%;
+      }
     }
 
     .sendBox {
@@ -159,41 +167,6 @@
         margin-right: 5px;
       }
 
-      button {
-      }
     }
   }
-  /*.chatroom {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    max-height: 100%;
-    padding: 10px;
-    .header {
-      flex: 1;
-      h1 {
-        font-family: $main-font;
-        font-size: 10px;
-      }
-    }
-
-    .conversation {
-      display: flex;
-      flex: 8;
-      overflow: auto;
-      flex-direction: column;
-      box-shadow: 0 0 5px $lightGrey;
-      border-radius: 5px;
-      padding: 10px;
-      margin-bottom: 10px;
-      min-height: 80%;
-      .message {
-        flex: 1;
-      }
-    }
-
-    .sendBox {
-      flex: 1;
-    }
-  }*/
 </style>

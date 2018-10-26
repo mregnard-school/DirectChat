@@ -40,7 +40,7 @@
       }
     },
     mounted() {
-      this.disconnected = this.client.friends;
+      this.disconnected = this.client.friends.slice();
       for (let i = 0; i < this.disconnected.length; i++) {
         let client = this.disconnected[i];
         if (client.ips.length > 0) {
@@ -53,6 +53,11 @@
       this.node.setOnNewConnection(this.onNewConnection);
       this.node.setOnEndConnection(this.onEndConnection);
 
+    },
+    watch: {
+      dicsonnected() {
+        console.log("disconnected changed");
+      }
     },
     computed: {
       friends() {

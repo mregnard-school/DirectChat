@@ -5,11 +5,13 @@
       <div class="chatrooms-search">
         <input type="text" placeholder="Search...">
       </div>
+        <div  v-for="wrapper in chatrooms">
+          <chatroom-thumbnail class="chatroom-thumbnail"
 
-        <chatroom-thumbnail class="chatroom-thumbnail"
-                            v-for="wrapper in chatrooms"
-                            v-bind:chatroom="wrapper.conversation"
-                            v-on:select-chatroom="changeChatroom"/>
+                              v-bind:chatroom="wrapper.conversation"
+                              v-on:select-chatroom="changeChatroom"/>
+        </div>
+
 
         <div>
           <button class="fab" @click="handleNewConversation">+</button>
@@ -85,6 +87,7 @@
       newChatroom(pseudos) {
         let friends = this.peer.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
+          console.log('friends');
           let friendsAndMe = friends.concat([this.client]);
           const messageTempalte = {
             id: 0,
@@ -139,6 +142,7 @@
         };
 
         this.chatrooms.push(conversationWrapper);
+        console.log(this.chatrooms.length)
         return conversation;
       },
       onReceiveData(data) {

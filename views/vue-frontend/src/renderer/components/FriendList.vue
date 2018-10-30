@@ -1,10 +1,13 @@
 <template>
-  <div>
-    Friends lists :
-    <div v-for="friend in friends" class="friends">
-      <div class="friend-info">{{friend.pseudo}}
-        <div v-if="friend.isConnected" class="connected">
-          Connected ! <!-- todo change this with icon or smthg better-->
+  <div class="friends">
+    <p>Friends :</p>
+    <div v-for="friend in friends" class="friend-container">
+      <div class="friend-info">
+        {{friend.pseudo}}
+      </div>
+      <div v-if="friend.isConnected" class="connected">
+        <div class="icon-container">
+          <span class="connected-icon"></span>
         </div>
       </div>
     </div>
@@ -29,6 +32,33 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss">
+  @import '~styles/global';
 
+  .friends {
+    display: flex;
+    padding-left: 10px;
+    flex-direction: column;
+    .friend-container {
+      display: flex;
+      flex-direction: row;
+      .friend-info {
+        flex: 2;
+      }
+
+      .connected {
+        flex: 1;
+
+        .icon-container {
+          .connected-icon {
+            height: 10px;
+            width: 10px;
+            background-color: lawngreen;
+            border-radius: 50%;
+            display: inline-block;
+          }
+        }
+      }
+    }
+  }
 </style>

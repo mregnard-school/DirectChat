@@ -6,49 +6,34 @@
 
     <div class="dashboard">
       <chatroom-home class="chatrooms"/>
-
-      <div v-for="friend in friends" class="friends"> <!--todo refact in own component-->
-        Friends lists :
-        <div class="friend-info">{{friend.pseudo}}
-          <div v-if="friend.isConnected" class="connected">
-            Connected ! <!-- todo change this with icon or smthg better-->
-          </div>
-        </div>
-      </div>
+      <friend-list />
     </div>
-
-
-
 
   </div>
 </template>
 
 <script>
 
-  import ChatroomHome from 'components/ChatroomHome'
+  import ChatroomHome from 'components/ChatroomHome';
+  import FriendList from 'components/FriendList';
   import store from '@/mutableStore';
 
   export default {
     name: "Home",
     components: {
       ChatroomHome,
-    },
-    data() {
-      return {
-        connected: [],
-        disconnected: [],
-      }
+      FriendList,
     },
     mounted() {
-      this.disconnected = this.client.friends.slice();
-      for (let i = 0; i < this.disconnected.length; i++) {
-        let client = this.disconnected[i];
-        if (client.ips.length > 0) {
-          this.disconnected.splice(i, 1);
-          client.isConnected = true;
-          this.connected.push(client);
+      this.client.friends.slice().forEach(friend => {
+        if(friend.ips.length > 0) {
+          friend.isConnected = true;
+          this.$store.commit('connectFriend', friend);
+        } else {
+          friend.isConnected = false;
+          this.$store.commit('disconnectFriend', friend);
         }
-      }
+      });
 
       this.node.setOnNewConnection(this.onNewConnection);
       this.node.setOnEndConnection(this.onEndConnection);
@@ -68,25 +53,12 @@
     methods: {
       onNewConnection(socket) {
         socket.client.isConnected = true;
-        for (let i = 0; i < this.disconnected.length; i++) {
-          let client = this.disconnected[i];
-          if (client.id === socket.client.id) {
-            this.disconnected.splice(i, 1);
-          }
-        }
-        this.connected.push(socket.client);
+        this.$store.commit('connectFriend', JSON.parse(JSON.stringify(socket.client)));
       },
       onEndConnection(socket) {
         socket.client.ips = [];
         socket.client.isConnected = false;
-        for (let i = 0; i < this.connected.length; i++) {
-          let client = this.connected[i];
-          if (client.id === socket.client.id) {
-            this.connected.splice(i, 1);
-          }
-        }
-
-        this.disconnected.push(socket.client);
+        this.$store.commit('disconnectFriend', JSON.parse(JSON.stringify(socket.client)));
       }
     }
   }

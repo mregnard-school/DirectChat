@@ -16,7 +16,7 @@
     <div class="chatroom-container" ref="chatroom">
       <div ref="messagesDisplay" class="conversation">
         <div v-for="message in conversation.messages">
-          <message v-bind:message="message" />
+          <message v-bind:message="message"/>
         </div>
       </div>
     </div>
@@ -25,7 +25,8 @@
     <div class="sendBox">
       <div class="sendBox-input">
         <label for="messageInput"></label>
-        <input type="text" id="messageInput" v-model.trim="messageToSend" v-on:keyup.enter="sendMessage">
+        <input type="text" id="messageInput" v-model.trim="messageToSend"
+               v-on:keyup.enter="sendMessage">
       </div>
       <div>
         <button @click="sendMessage">Send</button>
@@ -36,6 +37,7 @@
 </template>
 <script>
 
+  const http = require('p2p/services/axios-wrapper').http;
   import Client from 'p2p/client/client';
   import Message from 'components/Message';
   import store from '@/mutableStore';
@@ -70,14 +72,14 @@
     },
     methods: {
       cancel() {
-        if(this.changingName) {
+        if (this.changingName) {
           this.changingName = false;
         }
       },
       toggleChangingName() {
         if (this.name !== '') {
           this.changingName = !this.changingName;
-          if(this.changingName) {
+          if (this.changingName) {
             //Focus on input component so we can start to write right away
             //Doesn't work without nextTick()
             this.$nextTick(() => this.$refs.name.focus());
@@ -133,16 +135,25 @@
         this.conversation.messages.push(message);
         this.$emit('new-message');
       },
-      writeMessageTo(friend, message) { // TODO irindul 2018-10-25 : Handle not connected
+      writeMessageTo(friend, message) {
+        this.$store.dispatch('isConnected', friend).then(isConnected => {
+          if (!isConnected) {
+            this.handleNotConnected(friend, message);
+          }
+        });
         store.state.peer.node.writeMessageTo(friend, message);
       },
-      addNewMessage(message) {
-        this.conversation.messages.push(JSON.parse(message));
-        this.scrollDown();
+      handleNotConnected(friend, message) {
+        //todo test
+        http.post(`/client/${friend.id}/messages`, message)
+            .then(() => {
+              //Yeah message was stored on the server
+            }).catch(() => {
+
+        })
       },
       scrollDown() {
         this.$nextTick(() => {
-          console.log('scolling down');
           this.$refs.messagesDisplay.scrollTop =
               this.$refs.messagesDisplay.scrollHeight;
         });

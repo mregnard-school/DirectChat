@@ -1,7 +1,7 @@
 <template>
   <div>
     Friends lists :
-    <div v-for="friend in friends" class="friends"> <!--todo refact in own component-->
+    <div v-for="friend in friends" class="friends">
       <div class="friend-info">{{friend.pseudo}}
         <div v-if="friend.isConnected" class="connected">
           Connected ! <!-- todo change this with icon or smthg better-->

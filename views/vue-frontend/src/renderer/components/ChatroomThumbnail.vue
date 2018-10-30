@@ -26,7 +26,7 @@
   import store from '@/mutableStore';
 
   export default {
-    name: "ChatroomThumbnail", // TODO irindul 2018-10-25 : Add last message in thubnail
+    name: "ChatroomThumbnail",
     props: {
       chatroom: {
         type: Object,

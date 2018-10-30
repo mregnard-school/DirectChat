@@ -5,14 +5,12 @@
       <div class="chatrooms-search">
         <input type="text" placeholder="Search...">
       </div>
-        <div  v-for="wrapper in chatrooms">
+        <div  v-for="chatroom in conversations">
           <chatroom-thumbnail class="chatroom-thumbnail"
-
-                              v-bind:chatroom="wrapper.conversation"
-                              v-on:select-chatroom="changeChatroom"/>
+                              :chatroom="chatroom"
+                              @select-chatroom="changeChatroom"
+          />
         </div>
-
-
         <div>
           <button class="fab" @click="handleNewConversation">+</button>
         </div>
@@ -23,8 +21,9 @@
         <component :is="activeComponent"
                    v-bind="activeProperties"
                    :key="activeChatroom.id"
-                   v-on:new-chatroom="newChatroom"
-                   v-on:new-message="save"
+                   @new-chatroom="newChatroom"
+                   @last-message="setLastMessage"
+                   @new-message="save"
         />
       </keep-alive>
     </div>
@@ -71,6 +70,20 @@
         let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
         this.selectedChatroom = wrapper;
       },
+      setLastMessage(chatroom, message) {
+        this.conversations.filter(chtroom => chtroom.id === chatroom.id)
+            .forEach(chat => chat.last_message = message);
+      },
+      removeChatroom(chatroom) {
+        for (let i = 0; i < this.chatrooms.length; i++) {
+          if(this.chatrooms[i].id === chatroom.id) {
+            this.removeChatroomWithIndex(i);
+          }
+        }
+      },
+      removeChatroomWithIndex(i) {
+        this.chatrooms.splice(i,1);
+      },
       handleNewConversation() {
         this.selectedChatroom = {
           conversation: {},
@@ -92,7 +105,11 @@
             id: 0,
             conversation: {id: 0, name: "", friends: friendsAndMe,},
             type: types.information,
-            content: "Chat with {0} created ! "
+            content: "Chat with {0} created ! ",
+            author: {
+              id: this.client.id,
+              pseudo: this.client.pseudo,
+            }
           };
 
           this.createAndSendChatroomCreationMessage(messageTempalte, friends, this.client.pseudo);
@@ -100,6 +117,7 @@
           const messageForMyself = this.createMessage(messageTempalte, name);
 
           const conversation = this.createConversationWithWrapper(messageForMyself, true);
+          this.setLastMessage(conversation, messageForMyself);
           this.addAndSaveChatroom(conversation, messageForMyself);
         }
       },
@@ -111,7 +129,7 @@
         const createdMessage = {
           ...messageTemplate,
         };
-        createdMessage.conversation.name = chatroomName
+        createdMessage.conversation.name = chatroomName;
         createdMessage.content = messageTemplate.content.format(chatroomName);
         return createdMessage
       },
@@ -128,6 +146,7 @@
           'name': message.conversation.name,
           'friends': message.conversation.friends || [],
           'messages': [],
+          'last_message': message,
         };
 
         return conversation;
@@ -155,6 +174,13 @@
           conversation = this.createConversationWithWrapper(message);
         }
 
+        conversation.last_message = message;
+        if(this.selectedChatroom && this.selectedChatroom.conversation) {
+          if(conversation.id !== this.selectedChatroom.conversation.id) {
+            conversation.read = false;
+          }
+        }
+
         if(message.type === types.nameChange) {
           conversation.name = message.conversation.name;
         }
@@ -167,6 +193,9 @@
       },
     },
     computed: {
+      conversations() {
+        return this.chatrooms.map(wrapper => wrapper.conversation);
+      },
       storeFile() {
         return this.client.pseudo+'-chatroom';
       },

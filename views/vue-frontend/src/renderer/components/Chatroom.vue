@@ -25,7 +25,7 @@
     <div class="sendBox">
       <div class="sendBox-input">
         <label for="messageInput"></label>
-        <input type="text" id="messageInput" v-model="messageToSend" v-on:keyup.enter="sendMessage">
+        <input type="text" id="messageInput" v-model.trim="messageToSend" v-on:keyup.enter="sendMessage">
       </div>
       <div>
         <button @click="sendMessage">Send</button>
@@ -122,6 +122,7 @@
       },
       constructAndWriteMessageToAll(content) {
         const message = this.constructMessage(content);
+        this.$emit('last-message', this.conversation, message);
         this.writeMessageToAll(message);
       },
       writeMessageToAll(message) {

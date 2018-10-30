@@ -80,26 +80,4 @@
     }
 
   }
-
-  /*
-  .speech-bubble {
-	position: relative;
-	background: #00aabb;
-	border-radius: .4em;
-}
-
-.speech-bubble:after {
-	content: '';
-	position: absolute;
-	right: 0;
-	top: 50%;
-	width: 0;
-	height: 0;
-	border: 20px solid transparent;
-	border-left-color: #00aabb;
-	border-right: 0;
-	margin-top: -20px;
-	margin-right: -20px;
-}
-   */
 </style>

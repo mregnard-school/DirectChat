@@ -12,6 +12,13 @@
   resolved "https://registry.yarnpkg.com/7zip/-/7zip-0.0.6.tgz#9cafb171af82329490353b4816f03347aa150a30"
   integrity sha1-nK+xca+CMpSQNTtIFvAzR6oVCjA=
 
+"@johmun/vue-tags-input@^1.5.9":
+  version "1.5.9"
+  resolved "https://registry.yarnpkg.com/@johmun/vue-tags-input/-/vue-tags-input-1.5.9.tgz#2f2b2995b533eb1f5bf0ac11fd3e0a0bcf206eec"
+  integrity sha512-5jsQI/o/KNchVoccB8amJVkMRIVuPPzCz5yeX6QAggBWgK46PqRvWX7xTW35IcTtX/AHVJINc7eDVBs6Bny57A==
+  dependencies:
+    vue "^2.5.16"
+
 "@types/node@^8.0.24":
   version "8.10.36"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.36.tgz#eac05d576fbcd0b4ea3c912dc58c20475c08d9e4"

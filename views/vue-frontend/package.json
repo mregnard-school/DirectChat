@@ -51,6 +51,7 @@
     }
   },
   "dependencies": {
+    "@johmun/vue-tags-input": "^1.5.9",
     "axios": "^0.18.0",
     "electron-store": "^2.0.0",
     "moment": "^2.22.2",

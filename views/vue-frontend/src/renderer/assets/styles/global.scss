@@ -1,18 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
-$main-font: 'Roboto', sans-serif;
-$lightGrey: #bdbdbd;
-$blue: #2286c3;
-
-$primaryDarkColor: #0288D1;
-$primaryLightColor: #B3E5FC;
-$primaryColor: #03A9F4;
-$textColor: #FFFFFF;
-$accentColor: #ff4381;
-$primaryText: #212121;
-$secondaryText: #757575;
-$dividerColor: #BDBDBD;
+@import '_variable.scss';
 
 body {
   margin: 0;

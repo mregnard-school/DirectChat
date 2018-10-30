@@ -61,6 +61,11 @@ class MockWrapper {
                 "id": 2,
                 "pseudo": "John",
                 ips: [],
+              },
+              {
+                "id": 3,
+                "pseudo": "Henry",
+                ips: [],
               }
             ]
           }
@@ -80,6 +85,41 @@ class MockWrapper {
                 "pseudo": "Billy",
                 ips: [
                     "127.0.0.1:5000"
+                ],
+              },
+              {
+                "id": 3,
+                "pseudo": "Henry",
+                ips: [
+                
+                ],
+              }
+            ]
+          }
+        })
+      }
+      
+      if(payload.pseudo === 'Henry' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 3,
+            pseudo: payload.pseudo,
+            ips: [
+              "127.0.0.1:5002",
+            ],
+            friends: [
+              {
+                "id": 1,
+                "pseudo": "Billy",
+                ips: [
+                  "127.0.0.1:5000"
+                ],
+              },
+              {
+                "id": 2,
+                "pseudo": "John",
+                ips: [
+                    "127.0.0.1:5001"
                 ],
               }
             ]

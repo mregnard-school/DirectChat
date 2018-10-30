@@ -2,7 +2,7 @@
   <div class="new-chatroom">
     <div class="input">
       <label for="friends">With whom ?</label>
-      <input type="text" id="friends" v-model="pseudo" v-on:keyup.enter="submit">
+      <input type="text" autofocus="true" id="friends" v-model="pseudo" v-on:keyup.enter="submit">
     </div>
 
     <div class="submit">

@@ -1,18 +1,20 @@
 <template>
   <div class="login">
-    <div class="login-form">
+    <div class="login-form" @keypress.enter="login">
       <div class="login-input">
         <label for="pseudo">Pseudo</label>
-        <input v-model="pseudo" type="text" id="pseudo" placeholder="Enter your pseudo...">
+        <input v-model.trim="pseudo" autofocus type="text" id="pseudo" placeholder="Enter your pseudo...">
       </div>
 
       <div class="login-input">
         <label for="password">Password</label>
-        <input v-model="password" type="password" id="password" placeholder="Enter password"/>
+        <input v-model.trim="password" type="password" id="password" placeholder="Enter password"/>
       </div>
 
       <div class="login-submit">
-        <button @click="login">Log in</button>
+        <button @click="login">
+          Log in
+        </button>
       </div>
 
     </div>
@@ -35,23 +37,24 @@
     },
     methods: {
       login() {
-        const payload = {
-          pseudo: this.pseudo,
-          password: this.password,
-        };
-        http.post('/login', payload)
-            .then((response) => {
-              let client = response.data;
-              let peer = new Client(client);
-              store.push({
-                peer: peer,
-              });
-              this.peerCreated(peer);
-              this.$router.push('/home');
-            })
+        if (this.pseudo !== '' && this.password !== '') {
+          const payload = {
+            pseudo: this.pseudo,
+            password: this.password,
+          };
+          http.post('/login', payload)
+              .then((response) => {
+                let client = response.data;
+                let peer = new Client(client);
+                store.push({
+                  peer: peer,
+                });
+                this.peerCreated(peer);
+                this.$router.push('/home');
+              })
+        }
       },
       peerCreated(peer) {
-        //peer.setOnNewConnection(this.onNewConnection);
         const port = parseIpAndPortFromString(peer.client.ips[0]).port;
         peer.runServer(port);
 
@@ -87,7 +90,6 @@
       padding: 30px;
       border-radius: 5px;
       background: $primaryLightColor;
-     // transform: translateY(50%);
       .login-input {
         display: flex;
         flex-direction: column;

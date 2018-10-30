@@ -5,20 +5,20 @@
       <div class="chatrooms-search">
         <input type="text" placeholder="Search...">
       </div>
-        <div  v-for="chatroom in conversations">
-          <chatroom-thumbnail class="chatroom-thumbnail"
-                              :chatroom="chatroom"
-                              @select-chatroom="changeChatroom"
-          />
-        </div>
-        <div>
-          <button class="fab" @click="handleNewConversation">+</button>
-        </div>
+      <div v-for="chatroom in conversations">
+        <chatroom-thumbnail class="chatroom-thumbnail"
+                            :chatroom="chatroom"
+                            @select-chatroom="changeChatroom"
+        />
+      </div>
+      <div>
+        <button class="fab" @click="handleNewConversation">+</button>
+      </div>
     </div>
 
     <div class="selected-chatroom">
       <keep-alive>
-        <component :is="activeComponent"
+        <component ref="selected" :is="activeComponent"
                    v-bind="activeProperties"
                    :key="activeChatroom.id"
                    @new-chatroom="newChatroom"
@@ -59,7 +59,7 @@
     },
     created() {
       this.node.setOnReceiveData(this.onReceiveData);
-     // this.node.setOnNewConnection(this.onNewConnection);
+      // this.node.setOnNewConnection(this.onNewConnection);
       this.chatrooms = localStore.get(this.storeFile) || [];
       this.chatrooms.forEach(wrapper => {
         wrapper.component = Chatroom;
@@ -76,13 +76,13 @@
       },
       removeChatroom(chatroom) {
         for (let i = 0; i < this.chatrooms.length; i++) {
-          if(this.chatrooms[i].id === chatroom.id) {
+          if (this.chatrooms[i].id === chatroom.id) {
             this.removeChatroomWithIndex(i);
           }
         }
       },
       removeChatroomWithIndex(i) {
-        this.chatrooms.splice(i,1);
+        this.chatrooms.splice(i, 1);
       },
       handleNewConversation() {
         this.selectedChatroom = {
@@ -160,7 +160,7 @@
         };
 
         this.chatrooms.push(conversationWrapper);
-        if(setCurrent) {
+        if (setCurrent) {
           this.selectedChatroom = conversationWrapper;
         }
         return conversation;
@@ -175,13 +175,13 @@
         }
 
         conversation.last_message = message;
-        if(this.selectedChatroom && this.selectedChatroom.conversation) {
-          if(conversation.id !== this.selectedChatroom.conversation.id) {
+        if (this.selectedChatroom && this.selectedChatroom.conversation) {
+          if (conversation.id !== this.selectedChatroom.conversation.id) {
             conversation.read = false;
           }
         }
 
-        if(message.type === types.nameChange) {
+        if (message.type === types.nameChange) {
           conversation.name = message.conversation.name;
         }
 
@@ -189,6 +189,11 @@
       },
       addAndSaveChatroom(chatroom, message) {
         chatroom.messages.push(message);
+        this.$nextTick(() => {
+          if(this.$refs.selected) {
+            this.$refs.selected.scrollDown();
+          }
+        });
         this.save();
       },
     },
@@ -197,7 +202,7 @@
         return this.chatrooms.map(wrapper => wrapper.conversation);
       },
       storeFile() {
-        return this.client.pseudo+'-chatroom';
+        return this.client.pseudo + '-chatroom';
       },
       client() {
         return this.peer.client

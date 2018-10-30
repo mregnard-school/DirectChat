@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="chatroom-container">
+    <div class="chatroom-container" ref="chatroom">
       <div ref="messagesDisplay" class="conversation">
         <div v-for="message in conversation.messages">
           <message v-bind:message="message" />
@@ -61,6 +61,7 @@
     },
     mounted() {
       this.name = this.conversation.name;
+      this.scrollDown();
     },
     computed: {
       nameHasChanged() {
@@ -95,13 +96,11 @@
           }
         }
       },
-      onReceiveData(data) {
-        this.addNewMessage(data);
-      },
       sendMessage() {
         if (this.messageToSend !== '') {
           this.constructAndWriteMessageToAll(this.messageToSend);
           this.messageToSend = '';
+          this.scrollDown();
         }
       },
       constructMessage(content) {
@@ -139,8 +138,15 @@
       },
       addNewMessage(message) {
         this.conversation.messages.push(JSON.parse(message));
-        let messagesDisplay = this.$refs.messagesDisplay;
-        messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
+        this.scrollDown();
+      },
+      scrollDown() {
+        this.$nextTick(() => {
+          console.log('scolling down');
+          this.$refs.messagesDisplay.scrollTop =
+              this.$refs.messagesDisplay.scrollHeight;
+        });
+
       }
     },
   }

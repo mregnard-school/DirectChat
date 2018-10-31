@@ -1,34 +1,14 @@
-# select image
-FROM rust:1.23
+FROM golang:alpine
 
-# create a new empty shell project
-RUN USER=root cargo new --bin server
-WORKDIR /server
+# Install git & bash
+RUN apk update && apk add git && apk add bash
 
-# Set rustup 1.14.0 (1e51b07cc 2018-10-04) && cargo 1.31.0-nightly (09ce4b519 2018-10-16)
-# Verify with 'rustup --version && cargo --version'
-RUN rustup default nightly-2018-10-20
+COPY ./src $GOPATH/src/server/src/
 
-# Install orm cli
-RUN cargo install diesel_cli
+COPY src/.env $GOPATH/src/server/.env
 
+WORKDIR  $GOPATH/src/server/src
 
+RUN go get -d -v
 
-# copy over your manifests
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
-COPY ./.env ./.env
-RUN cargo build
-
-
-# this build step will cache your dependencies
-RUN rm src/*.rs
-
-# copy your source tree
-COPY ./src ./src
-
-# copy migrations
-COPY ./migrations ./migrations
-
-COPY ./entryfile.sh ./entryfile.sh
-ENTRYPOINT ["./entryfile.sh"]
+WORKDIR  $GOPATH/src/server/

@@ -1,9 +1,4 @@
-# gotham_rust
-
-- Rust and Cargo version  
-`rustup 1.14.0 (1e51b07cc 2018-10-04)
-cargo 1.31.0-nightly (2d0863f65 2018-10-20)`  
-
-- To run the server service, you need to go on the parent folder and type  
-`docker-compose up`
--- don't know why but the first start isn't working
+# GO-API
+docker-compose up to launch the app
+You can have somme issues because the database is not initiated, stop docker-compose and rerun it
+Still need to find a way to create a database test 'test_server'

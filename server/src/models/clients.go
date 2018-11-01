@@ -19,12 +19,12 @@ type Token struct {
 //  Accounts []CustomizeAccount `gorm:"many2many:PersonAccount;foreignkey:idPerson;association_foreignkey:idAccount;association_jointable_foreignkey:account_id;jointable_foreignkey:person_id;"`
 //a struct to rep user client
 type Client struct {
-	gorm.Model
-	Pseudo   string   `json:"pseudo"`
-	Password string   `json:"password"`
-	Ips      []Ip     `gorm:"many2many:client_address"`
-	Friends  []Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id"`
-	Token    string   `json:"token";sql:"-"`
+	ID 			uint	 `json:"id"`
+	Pseudo   	string   `json:"pseudo"`
+	Password 	string   `json:"password"`
+	Ips      	[]Ip     `json:"ips";gorm:"many2many:client_address"`
+	Friends  	[]Client `json:"friends";gorm:"many2many:client_client;association_jointable_foreignkey:friend_id"`
+	Token    	string   `json:"token";sql:"-"`
 }
 
 //Validate incoming user details...

@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gorilla/mux"
-	"server/src/controllers"
+	"server/controllers"
 	"log"
 	"net/http"
 )
@@ -26,6 +26,7 @@ func (a *Application) InitializeRoutes() {
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.GetClient).Methods("GET")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.UpdateClient).Methods("PUT")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.DeleteClient).Methods("DELETE")
+	a.Router.HandleFunc("/api/clients/{id:[0-9]}/friends", controllers.AddFriend).Methods("POST")
 	a.Router.Use(JwtAuthentication) //attach JWT auth middleware
 }
 

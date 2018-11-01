@@ -3,34 +3,34 @@ version: '3.3'
 services:
   backend:
     build:
-      context: ./server
+      context: server/
       dockerfile: Dockerfile
     depends_on:
-        - db
+    - "db"
     links:
-        - db
+    - db
     ports:
-      - "8000:8000"
+    - "8000:8000"
     volumes:
-    - ./server/src:/server/src
-    env_file: ./server/.env
+    - ./server/src:/go/src/server/
+    - ./server/entrypoint.sh:/go/src/server/entrypoint.sh
+    - ./server/.env:/go/src/server/.env
+    entrypoint: /go/src/server/entrypoint.sh
     networks:
-        - app
+    - app
   db:
     image: mysql:5.7
     ports:
-      - "3306:3306"
+    - "3306:3306"
     container_name: "db"
     networks:
-        - app
+    - app
     environment:
-      MYSQL_DATABASE: server
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_USER: user
       MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: server
 
 networks:
   app:
-      driver: bridge
-#Todo :
-#Configure Node in docker
+    driver: bridge

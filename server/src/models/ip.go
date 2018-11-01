@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
-	u "server/src/utils"
+	u "server/utils"
 )
 
 type Ip struct {

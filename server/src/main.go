@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
-	"server/src/app"
-	"server/src/models"
+	"server/app"
+	"server/models"
 	"log"
 	"os"
 )

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"server/src/models"
-	u "server/src/utils"
+	"server/models"
+	u "server/utils"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,23 +14,14 @@ import (
 var UpdateClient = func(w http.ResponseWriter, r *http.Request) {
 
 	client := &models.Client{}
-
-
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	_, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		u.RespondWithError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
-	//@TODO need to find a way to iterate through every struct value
-	clientFromDb, errs := models.GetClient(uint(id))
-	log.Print(clientFromDb, errs)
-	//@TODO get the client and replace values by changed value
-	//@TODO save friend in pivot table
 	err = json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
-	log.Print(client)
 	json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
-	log.Print(client)
 	if err != nil {
 		log.Print(err)
 		u.Respond(w, u.Message(false, "Invalid request"))
@@ -73,4 +64,3 @@ var GetClient = func(w http.ResponseWriter, r *http.Request) {
 	}
 	u.RespondWithJSON(w, http.StatusOK, client)
 }
-

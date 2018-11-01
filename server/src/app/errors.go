@@ -2,7 +2,7 @@ package app
 
 import (
 	"net/http"
-	u "server/src/utils"
+	u "server/utils"
 )
 
 var NotFoundHandler = func(next http.Handler) http.Handler {

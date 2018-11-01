@@ -4,9 +4,9 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	u "server/src/utils"
 	"golang.org/x/crypto/bcrypt"
 	"os"
+	u "server/utils"
 )
 
 /*
@@ -42,7 +42,7 @@ func (client *Client) Validate() (map[string] interface{}, bool) {
 	temp := &Client{}
 
 	//check for errors and duplicate pseudos
-	err := GetDB().Table("clients").Where("Pseudo = ?", client.Pseudo).First(temp).Error
+	err := GetDB().Table("clients").Where("pseudo = ?", client.Pseudo).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
@@ -80,10 +80,10 @@ func (client *Client) Create() (*Client, error) {
 	return client, nil
 }
 
-func Login(pseudo, password string) (map[string]interface{}) {
+func Login(pseudo string, password string) (map[string]interface{}) {
 
 	client := &Client{}
-	err := GetDB().Table("clients").Where("Pseudo = ?", pseudo).First(client).Error
+	err := GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Pseudo address not found")
@@ -126,6 +126,23 @@ func GetClient(u uint) (*Client, error) {
 	return client, nil
 }
 
+func GetClientFromPseudo(friend *Client) (*Client, error) {
+	pseudo := friend.Pseudo
+	client := &Client{}
+	err := GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
+	GetDB().Preload("Ips").First(&client)
+	GetDB().Preload("Friends").First(&client)
+	if err != nil {
+		return nil, err
+	}
+	if client.Pseudo == "" { //User not found!
+		return nil, errors.New("Pseudo is empty")
+	}
+
+	client.Password = ""
+	return client, nil
+}
+
 func (client *Client) Update() (map[string] interface{})  {
 	//check if ip has changed
 	if len(client.Ips) > 0 {
@@ -145,9 +162,12 @@ func (client *Client) Delete() (map[string] interface{}) {
 	return response
 }
 
-func (client *Client) AddFriend(friend Client) {
+func (client *Client) AddFriend(friend Client) (map[string] interface{}){
+	response := u.Message(true, "Client has been created")
 	client.Friends = append(client.Friends, friend)
 	client.Update()
+	response["client"] = client
+	return response
 }
 
 func (client *Client) RemoveFriend(friend *Client) {
@@ -166,4 +186,5 @@ func (client *Client) RemoveFriend(friend *Client) {
 	client.Friends = friends
 	client.Update()
 }
+
 

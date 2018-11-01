@@ -2,6 +2,7 @@ package models
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -9,11 +10,12 @@ import (
 
 var db *gorm.DB
 func Open(username string, password string, dbName string, dbHost string) {
-	dbUri := fmt.Sprintf("%s:%s@tcp(%s)/%s", username, password, dbHost,  dbName)
+	dbUri := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", username, password, dbHost,  dbName)
 
 	conn, err := gorm.Open("mysql", dbUri)
 	if err != nil {
 		fmt.Print(err)
+		log.Print(err)
 	}
 
 	db = conn

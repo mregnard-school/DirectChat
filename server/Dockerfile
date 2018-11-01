@@ -3,12 +3,8 @@ FROM golang:alpine
 # Install git & bash
 RUN apk update && apk add git && apk add bash
 
-COPY ./src $GOPATH/src/server/src/
+COPY ./src $GOPATH/src/server
 
-COPY src/.env $GOPATH/src/server/.env
-
-WORKDIR  $GOPATH/src/server/src
+WORKDIR  $GOPATH/src/server
 
 RUN go get -d -v
-
-WORKDIR  $GOPATH/src/server/

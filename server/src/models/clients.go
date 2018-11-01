@@ -22,8 +22,8 @@ type Client struct {
 	ID 			uint	 `json:"id"`
 	Pseudo   	string   `json:"pseudo"`
 	Password 	string   `json:"password"`
-	Ips      	[]Ip     `json:"ips";gorm:"many2many:client_address"`
-	Friends  	[]Client `json:"friends";gorm:"many2many:client_client;association_jointable_foreignkey:friend_id"`
+	Ips      	[]Ip     `gorm:"many2many:client_address";json:"ips"`
+	Friends  	[]Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id";json:"friends"`
 	Token    	string   `json:"token";sql:"-"`
 }
 
@@ -84,12 +84,16 @@ func Login(pseudo string, password string) (map[string]interface{}) {
 
 	client := &Client{}
 	err := GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Pseudo address not found")
 		}
 		return u.Message(false, "Connection error. Please retry")
 	}
+
+	GetDB().Preload("Ips").First(&client)
+	GetDB().Preload("Friends").First(&client)
 
 	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!

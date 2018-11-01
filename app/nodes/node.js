@@ -1,7 +1,22 @@
 const net = require('net');
+const moment = require('moment');
 const chain = require('./middlewares/');
 const ServerHandler = require('./network/connectionHandler').Server;
 const ClientHandler = require('./network/connectionHandler').Client;
+
+class ChangeableCallback {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  
+  setCallback(callback) {
+    this.callback = callback;
+  }
+  
+  getCallback() {
+    return this.callback;
+  }
+}
 
 class Node {
   constructor(client) {
@@ -9,17 +24,30 @@ class Node {
     this.sockets = []; //Maybe change this with hashmap client/socket
     this.serverSocket = undefined;
     this.middleWareChain = chain;
-    this.onReceivedData = () => {};
-    this.onEndConnection = () => {};
+    this.onEndConnection = () => {
+    };
+    this.onNewConnection = () => {
+    };
+    
+    this.callbackHandler = new ChangeableCallback(() => {
+    });
   }
   
   setOnReceiveData(onReceiveData) {
-    this.setOnReceiveData = onReceiveData;
+    this.callbackHandler.setCallback(onReceiveData);
     return this;
   }
   
   setOnEndConnection(onEndConnection) {
-    this.setOnEndConnection(onEndConnection);
+    this.onEndConnection = onEndConnection;
+    return this;
+  }
+  
+  setOnNewConnection(onNewConnection) {
+    this.onNewConnection = (socket) => {
+      onNewConnection(socket);
+    };
+    return this;
   }
   
   runServer(port) {
@@ -27,21 +55,26 @@ class Node {
       this.sockets.push(socket);
       const serverConnectionHandler = new ServerHandler(socket,
           this.client);
-      this.iniitializeConnectionHandler(serverConnectionHandler);
+      this.initializeConnectionHandler(serverConnectionHandler, () => {
+        this.onNewConnection(socket);
+      });
     });
     
     this.serverSocket.listen(port);
   }
   
-  iniitializeConnectionHandler(handler, resolve, reject) {
-    handler.setOnReceiveData(this.onReceivedData)
-        .setOnConnectionClose(this.onEndConnection)
+  initializeConnectionHandler(handler, resolve, reject) {
+    handler.setCallbackHandler(this.callbackHandler)
+        .setOnConnectionClose((socket) => {
+          this.sockets = this.sockets.filter(sock => sock !== socket);
+          this.onEndConnection(socket)
+        })
         .setOnError((error) => {
-          if(reject) {
+          if (reject) {
             reject(error);
           }
           else {
-            console.error(error);
+            console.log('Server already running, not restarting');
           }
         })
         .handleOnConnection(resolve);
@@ -55,22 +88,31 @@ class Node {
   }
   
   connectTo(ip, port) {
-    const clientSocket = new net.Socket();
-    return new Promise((resolve, reject) => {
-      clientSocket.connect(port, ip, () => {
-        this.sockets.push(clientSocket);
-        const handler = new ClientHandler(clientSocket, this.client);
-        this.iniitializeConnectionHandler(handler, resolve, reject);
-      });
-    });
+    const socket = net.createConnection(port, ip);
+    this.sockets.push(socket);
+    const handler = new ClientHandler(socket, this.client);
+    this.initializeConnectionHandler(handler, () => {}, () => {});
+  }
+  
+  writeRaw(client, message) {
+    let content = this.applyMiddlewares(message);
+    let sockets = this.socketsAssociatedWithClient(client);
+    sockets.forEach((socket) => {
+      socket.write(content);
+    })
   }
   
   writeMessageTo(client, message) {
-    let content = this.applyMiddlewares(message);
-    let sockets = this.socketsAssociatedWithClient(client);
+    const sockets = this.socketsAssociatedWithClient(client);
+    const messageObject = this.constructMesage(message);
     sockets.forEach(socket => {
-      socket.write(content); // TODO irindul 2018-10-16 : Construct message object here (date, author, content etc..)
+      socket.write(messageObject);
     });
+  }
+  
+  constructMesage(message) {
+    message.content = this.applyMiddlewares(message.content);
+    return JSON.stringify(message);
   }
   
   applyMiddlewares(message) {

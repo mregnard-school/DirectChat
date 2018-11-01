@@ -1,19 +1,12 @@
 const Node = require('../nodes/node');
 const HashTable = require('../services/util').HashTable;
+const parseIp = require('../services/util').parseIpAndPortFromString;
 
 class Client {
   constructor(client) {
     this.ipTable = new HashTable();
     this.client = client;
     this.node = new Node(client);
-  }
-  
-  parseIpAndPortFromString(ipString) {
-    let splited = ipString.split(':');
-    return {
-      "ip": splited[0],
-      "port": parseInt(splited[1]),
-    }
   }
   
   mapFriendsToIPs(friends) {
@@ -25,7 +18,7 @@ class Client {
   }
   
   addFriendIpToTable(friend, ip) {
-    let ipEntry = this.parseIpAndPortFromString(ip);
+    let ipEntry = parseIp(ip);
     this.ipTable.put(friend, ipEntry);
   }
   
@@ -33,6 +26,39 @@ class Client {
     this.ipTable.forEach((key, value) => {
       this.node.connectTo(value.ip, value.port);
     });
+  }
+  
+  getFriendsWithPseudos(pseudos) {
+    let friends = [];
+    this.client.friends.forEach(friend => {
+      if (pseudos.includes(friend.pseudo)) {
+        friends.push(friend);
+      }
+    });
+    return friends;
+  }
+  
+  handleFriendConnection(friend) {
+    this.client.friends.filter(amigo => amigo.id === friend.id)
+        .forEach(amigo => amigo.ips.push(friend.ips))
+  }
+  
+  runServer(port) {
+    this.node.runServer(port);
+  }
+  
+  setOnReceiveData(onReceiveData) {
+    this.node.setOnReceiveData(onReceiveData);
+    return this;
+  }
+  
+  setOnEndConnection(onEndConnection) {
+    this.node.setOnEndConnection(onEndConnection);
+    return this;
+  }
+  
+  setOnNewConnection(onNewConnection) {
+    this.node.setOnNewConnection(onNewConnection);
   }
 }
 

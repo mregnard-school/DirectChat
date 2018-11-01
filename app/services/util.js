@@ -26,4 +26,13 @@ HashTable.prototype = {
   }
 };
 
-module.exports = {HashTable};
+
+function parseIpAndPortFromString(ipString) {
+  let splited = ipString.split(':');
+  return {
+    "ip": splited[0],
+    "port": parseInt(splited[1]),
+  }
+}
+
+module.exports = {HashTable, parseIpAndPortFromString};

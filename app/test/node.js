@@ -63,7 +63,7 @@ describe("Node", () => {
     nodeServer.runServer(5000);
     
     nodeClient.connectTo('127.0.0.1', 5000).then(() => {
-      nodeServer.writeMessageTo(clients[1], "Hello");
+      nodeServer.writeRaw(clients[1], "Hello");
       expect(receiveStub.calledOnce);
       nodeServer.closeServer();
       done();
@@ -73,12 +73,12 @@ describe("Node", () => {
   it("client should send a message to server", (done) => {
     const nodeServer = new Node(clients[0]);
     const nodeClient = new Node(clients[1]);
-    const receiveStub = sinon.stub(nodeServer, 'onReceivedData');
+    const receiveStub = sinon.stub(nodeServer.callbackHandler, 'getCallback');
     
     nodeServer.runServer(5000);
     
     nodeClient.connectTo('127.0.0.1', 5000).then(() => {
-      nodeClient.writeMessageTo(clients[0], "Hello");
+      nodeClient.writeRaw(clients[0], "Hello");
       expect(receiveStub.calledOnce);
       nodeServer.closeServer();
       done();

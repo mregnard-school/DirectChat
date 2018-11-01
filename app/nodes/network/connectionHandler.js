@@ -5,13 +5,14 @@ class ConnectionHandler {
   constructor(socket, client) {
     this.socket = socket;
     this.client = client;
-    this.onReceiveData = () => {};
     this.onConnectionClose = () => {};
     this.onError = () => {};
+    
+    this.callbackHandler = {};
   }
   
-  setOnReceiveData(onReceiveData) {
-    this.onReceiveData = onReceiveData;
+  setCallbackHandler(callbackHandler) {
+    this.callbackHandler = callbackHandler;
     return this;
   }
   
@@ -34,13 +35,15 @@ class ConnectionHandler {
     this.socket.on('data', (data) => {
       this.handleHandshake(data, resolve);
     });
-    this.socket.on('end', this.onConnectionClose);
+    this.socket.on('end', () => {
+      this.onConnectionClose(this.socket);
+    });
     this.socket.on('error', this.onError);
   }
   
   handleHandshake(data, resolve) {
     const handshakeHandler = this.getHandshakeHandler();
-    handshakeHandler.handleData(data, this.onReceiveData, resolve);
+    handshakeHandler.handleData(data, this.callbackHandler, resolve);
   }
   
   getHandshakeHandler() {

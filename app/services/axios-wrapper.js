@@ -45,6 +45,89 @@ class MockWrapper {
       })
     }
   }
+  
+  post(url, payload) {
+    if(url.includes('login')) {
+      if(payload.pseudo === 'Billy' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 1, // TODO irindul 2018-10-20 : Create token here
+            pseudo: payload.pseudo,
+            ips: [
+                "127.0.0.1:5000",
+            ],
+            friends: [
+              {
+                "id": 2,
+                "pseudo": "John",
+                ips: [],
+              },
+              {
+                "id": 3,
+                "pseudo": "Henry",
+                ips: [],
+              }
+            ]
+          }
+        })
+      }
+      if(payload.pseudo === 'John' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 2,
+            pseudo: payload.pseudo,
+            ips: [
+              "127.0.0.1:5001",
+            ],
+            friends: [
+              {
+                "id": 1,
+                "pseudo": "Billy",
+                ips: [
+                    "127.0.0.1:5000"
+                ],
+              },
+              {
+                "id": 3,
+                "pseudo": "Henry",
+                ips: [
+                
+                ],
+              }
+            ]
+          }
+        })
+      }
+      
+      if(payload.pseudo === 'Henry' && payload.password === 'azerty') {
+        return Promise.resolve({
+          data: {
+            id: 3,
+            pseudo: payload.pseudo,
+            ips: [
+              "127.0.0.1:5002",
+            ],
+            friends: [
+              {
+                "id": 1,
+                "pseudo": "Billy",
+                ips: [
+                  "127.0.0.1:5000"
+                ],
+              },
+              {
+                "id": 2,
+                "pseudo": "John",
+                ips: [
+                    "127.0.0.1:5001"
+                ],
+              }
+            ]
+          }
+        })
+      }
+    }
+  }
 }
 
 //const http = new Wrapper().service;

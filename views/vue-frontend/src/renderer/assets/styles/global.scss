@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+@import '_variable.scss';
+
+body {
+  margin: 0;
+  font-family: $main-font;
+}
+
+label {
+  padding-bottom: 2px;
+}
+
+input {
+  border-style: none;
+  padding: 5px;
+
+  border-radius: 7px;
+  outline-width: 0;
+
+  &:focus {
+    box-shadow: 0 0 1px 1px $accentColor;
+  }
+}
+
+button {
+  border-style: none;
+  background: $accentColor;
+  color: $textColor;
+  font-size: 15px;
+  border-radius: 5px;
+  display: block;
+
+  &:focus {
+    outline-width: 0px;
+    box-shadow: 0 0 2px 1px $accentColor;
+  }
+}

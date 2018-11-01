@@ -1,21 +1,36 @@
-version: '3.0'
-services: 
-  backend: 
+version: '3.3'
+
+services:
+  backend:
     build:
-      context: ./server
+      context: server/
       dockerfile: Dockerfile
-    command: cargo run
-    ports: 
-    - "8080:8080"
-    volumes: 
-    - ./server:/usr/src/app 
-    - ./server/registry:/root/.cargo/registry
+    depends_on:
+    - "db"
+    links:
+    - db
+    ports:
+    - "8000:8000"
+    volumes:
+    - ./server/src:/go/src/server/
+    - ./server/entrypoint.sh:/go/src/server/entrypoint.sh
+    - ./server/.env:/go/src/server/.env
+    entrypoint: /go/src/server/entrypoint.sh
+    networks:
+    - app
+  db:
+    image: mysql:5.7
+    ports:
+    - "3306:3306"
+    container_name: "db"
+    networks:
+    - app
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: server
 
-volumes:
-  registry:
-    driver: local
-
-#Todo : 
-#Configure Node in docker
-#Configure DB for Rust app (for clients and all)
-#Condifure networks properly
+networks:
+  app:
+    driver: bridge

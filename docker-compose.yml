@@ -16,6 +16,7 @@ services:
     - ./server/entrypoint.sh:/go/src/server/entrypoint.sh
     - ./server/.env:/go/src/server/.env
     entrypoint: /go/src/server/entrypoint.sh
+    command: go run main.go
     networks:
     - app
   db:
@@ -23,6 +24,8 @@ services:
     ports:
     - "3306:3306"
     container_name: "db"
+    volumes:
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
     - app
     environment:

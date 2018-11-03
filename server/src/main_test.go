@@ -1,9 +1,10 @@
-package main_test
+package main
 
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
+	"log"
 	"server/app"
 	"server/models"
 	"golang.org/x/crypto/bcrypt"
@@ -16,6 +17,7 @@ import (
 var a app.Application
 
 func TestMain(m *testing.M) {
+	log.Print("Running test !")
 	e := godotenv.Load()
 	if e != nil {
 		fmt.Print(e)
@@ -32,6 +34,7 @@ func TestMain(m *testing.M) {
 
 	models.Open(username, password, dbName, dbHost)
 	if !ensureTableExists() {
+		fmt.Print("La db n'existe pas ")
 		panic(m)
 	}
 	code := m.Run()
@@ -244,7 +247,7 @@ func compareClient2Friends(client *models.Client, t *testing.T, f_friend *models
 	compareClient(client, dbClient, t)
 	friends := dbClient.Friends
 	if l := len(friends); l != 2 {
-		t.Error("Client is supposed to have 2 friends, instead had '%s'", l)
+		t.Errorf("Client is supposed to have 2 friends, instead had '%d'", l)
 	}
 	compareClient(f_friend, &friends[0], t)
 	compareClient(s_friend, &friends[1], t)
@@ -311,7 +314,7 @@ func compareClientWithFriends(idClient int, client *models.Client, friends []mod
 	compareClient(client, dbClient, t)
 	dbFriends := dbClient.Friends
 	if l := len(dbFriends); l != len(friends){
-		t.Error("Client is supposed to have '%d' friends, instead had '%d'", len(friends), l)
+		t.Errorf("Client is supposed to have '%v' friends, instead had '%v'", len(friends), l)
 	}
 	for i := 0; i < len(friends); i++ {
 		compareClient(&friends[i], &dbFriends[i], t)

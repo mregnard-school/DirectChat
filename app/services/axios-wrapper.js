@@ -1,3 +1,4 @@
+// TODO irindul 2018-11-03 : Move into frontend folder
 const axios = require('axios');
 const mock = require('./mock');
 class Wrapper {
@@ -5,12 +6,11 @@ class Wrapper {
     this.initService();
   }
   
-  
-  
   initService() {
     this.serviceAxios = axios.create({});
     this.serviceAxios.interceptors.request.use(
         config => {
+          config.baseURL = 'http://localhost:8000/api'; // TODO irindul 2018-11-03 : Retrieve from env.js
           const token = ''; // TODO irindul 2018-10-15 : Add JWT token
           if (token) {
             config.headers.Authorization = 'bearer ' + token;
@@ -131,5 +131,5 @@ class MockWrapper {
 }
 
 //const http = new Wrapper().service;
-const http = new MockWrapper();
+const http = new Wrapper().serviceAxios;
 module.exports = {http};

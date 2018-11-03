@@ -3,7 +3,7 @@
 
     <div class="chatroom-thumbnails">
       <div class="chatrooms-search">
-        <input type="text" placeholder="Search...">
+        <input type="text" v-model="filter" placeholder="Search...">
       </div>
       <div v-for="chatroom in conversations">
         <chatroom-thumbnail class="chatroom-thumbnail"
@@ -55,6 +55,7 @@
       return {
         chatrooms: [],
         selectedChatroom: null,
+        filter: '',
       }
     },
     created() {
@@ -199,7 +200,9 @@
     },
     computed: {
       conversations() {
-        return this.chatrooms.map(wrapper => wrapper.conversation);
+        return this.chatrooms.map(wrapper => wrapper.conversation).filter((conversation) => {
+         return conversation.name.includes(this.filter);
+        });
       },
       storeFile() {
         return this.client.pseudo + '-chatroom';

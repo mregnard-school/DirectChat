@@ -36,6 +36,6 @@ var AddFriend = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Invalid pseudo"))
 	}
 
-	resp := client.AddFriend(*friend)
+	resp := client.AddFriend(friend)
 	u.Respond(w, resp)
 }

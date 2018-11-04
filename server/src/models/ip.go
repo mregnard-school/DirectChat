@@ -10,6 +10,10 @@ type Ip struct {
 	Address string `json:"address"`
 }
 
+func (*Ip) TableName() string {
+	return "ips"
+}
+
 func (address *Ip) Validate() (map[string] interface{}, bool){
 
 	//temp := &Address{}

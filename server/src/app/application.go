@@ -29,7 +29,3 @@ func (a *Application) InitializeRoutes() {
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}/friends", controllers.AddFriend).Methods("POST")
 	a.Router.Use(JwtAuthentication) //attach JWT auth middleware
 }
-
-
-
-

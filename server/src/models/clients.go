@@ -22,9 +22,13 @@ type Client struct {
 	ID 			uint	 `json:"id"`
 	Pseudo   	string   `json:"pseudo"`
 	Password 	string   `json:"password"`
-	Ips      	[]Ip     `gorm:"many2many:client_address";json:"ips"`
-	Friends  	[]Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id";json:"friends"`
+	Ips      	[]*Ip     `gorm:"many2many:client_address";json:"ips"`
+	Friends  	[]*Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id";json:"friends"`
 	Token    	string   `json:"token";sql:"-"`
+}
+
+func (*Client) TableName() string {
+	return "clients"
 }
 
 //Validate incoming user details...
@@ -117,8 +121,10 @@ func GetClient(u uint) (*Client, error) {
 
 	client := &Client{}
 	err := GetDB().Table("clients").Where("id = ?", u).First(client).Error
-	GetDB().Preload("Ips").First(&client)
-	GetDB().Preload("Friends").First(&client)
+	if err != nil {
+		return nil, err
+	}
+	err = client.Preload()
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +134,15 @@ func GetClient(u uint) (*Client, error) {
 
 	client.Password = ""
 	return client, nil
+}
+
+func (client *Client) Preload() error {
+	err := GetDB().Preload("Ips").First(&client).Error
+	if err != nil {
+		return err
+	}
+	err = GetDB().Preload("Friends").First(&client).Error
+	return err
 }
 
 func GetClientFromPseudo(friend *Client) (*Client, error) {
@@ -166,7 +181,7 @@ func (client *Client) Delete() (map[string] interface{}) {
 	return response
 }
 
-func (client *Client) AddFriend(friend Client) (map[string] interface{}){
+func (client *Client) AddFriend(friend *Client) (map[string] interface{}){
 	response := u.Message(true, "Client has been created")
 	client.Friends = append(client.Friends, friend)
 	client.Update()

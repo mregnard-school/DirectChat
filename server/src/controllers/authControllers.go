@@ -2,11 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"server/models"
-	u "server/utils"
 	"net/http"
+	u "server/utils"
 )
+
+/**
+400 -> route qui existe pas
+422-UnprocessableEntity-> données au mauvaais format
+500-> problème serveur
+ */
 
 var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 
@@ -27,9 +32,7 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
 	client := &models.Client{}
-	log.Printf("client before: %s", client)
 	err := json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
-	log.Printf("client after decoding: %s", client)
 	if err != nil {
 		u.Respond(w, u.Message(false, "Invalid request"))
 		return

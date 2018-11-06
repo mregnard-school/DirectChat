@@ -5,6 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"os"
 	u "server/utils"
 )
@@ -19,12 +20,13 @@ type Token struct {
 //  Accounts []CustomizeAccount `gorm:"many2many:PersonAccount;foreignkey:idPerson;association_foreignkey:idAccount;association_jointable_foreignkey:account_id;jointable_foreignkey:person_id;"`
 //a struct to rep user client
 type Client struct {
-	ID 			uint	 `json:"id"`
-	Pseudo   	string   `json:"pseudo"`
-	Password 	string   `json:"password"`
-	Ips      	[]*Ip     `gorm:"many2many:client_address";json:"ips"`
-	Friends  	[]*Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id";json:"friends"`
-	Token    	string   `json:"token";sql:"-"`
+	ID 			uint	 		`json:"id"`
+	Pseudo   	string   		`json:"pseudo"`
+	Password 	string   		`json:"password"`
+	Ips      	[]*Ip     		`gorm:"many2many:client_address";json:"ips"`
+	Friends  	[]*Client  		`sql:"-"`
+	Friendships	[]*Friendship
+	Token    	string   		`json:"token";sql:"-"`
 }
 
 func (*Client) TableName() string {
@@ -65,7 +67,7 @@ func (client *Client) Create() (*Client, error) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)
-
+	client.RegisterFriends()
 	GetDB().Create(client)
 
 	if client.ID <= 0 {
@@ -141,8 +143,22 @@ func (client *Client) Preload() error {
 	if err != nil {
 		return err
 	}
-	err = GetDB().Preload("Friends").First(&client).Error
+	var friendships []*Friendship
+	client.getFriends(friendships)
 	return err
+}
+
+func (client *Client) getFriends(friendships []*Friendship) {
+	GetDB().Table("friendships").Where("client_id = ?", client.ID).Find(&friendships)
+	var friends []*Client
+	for i := 0; i < len(friendships); i++ {
+		friend, err := friendships[i].getFriend()
+		if err != nil {
+			log.Printf("Error loading friends: %s", err.Error())
+		}
+		friends = append(friends, friend)
+	}
+	client.Friends = friends
 }
 
 func GetClientFromPseudo(friend *Client) (*Client, error) {
@@ -167,7 +183,6 @@ func (client *Client) Update() (map[string] interface{})  {
 	if len(client.Ips) > 0 {
 		GetDB().Model(&client).Association("Ips").Replace(client.Ips)
 	}
-
 	GetDB().Save(&client)
 
 	resp := u.Message(true, "Client updated")
@@ -184,6 +199,7 @@ func (client *Client) Delete() (map[string] interface{}) {
 func (client *Client) AddFriend(friend *Client) (map[string] interface{}){
 	response := u.Message(true, "Client has been created")
 	client.Friends = append(client.Friends, friend)
+	client.addFriendShip(friend)
 	client.Update()
 	response["client"] = client
 	return response
@@ -205,5 +221,25 @@ func (client *Client) RemoveFriend(friend *Client) {
 	client.Friends = friends
 	client.Update()
 }
+func (client *Client) RegisterFriends() {
+	var friendships []*Friendship
+	for i:=0; i< len(client.Friends); i++ {
+		friendship := &Friendship{
+			FriendID:client.Friends[i].ID,
+			ClientID:client.ID,
+			Accepted:false,
+		}
+		friendships = append(friendships, friendship)
+	}
+	client.Friendships = friendships
+	//GetDB().Save(friendships)
+}
 
-
+func (client *Client) addFriendShip(friend *Client)  {
+	friendship := &Friendship{
+		FriendID:friend.ID,
+		ClientID:client.ID,
+		Accepted:false,
+	}
+	client.Friendships = append(client.Friendships, friendship)
+}

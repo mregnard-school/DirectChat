@@ -50,7 +50,7 @@ func ensureTableExists() bool {
 	return client && address && clientClient && clientAddress
 }
 func dropTables() {
-	models.GetDB().DropTable(&models.Client{}, &models.Ip{}, "client_client", "client_address")
+	models.GetDB().DropTable(&models.Client{}, &models.Ip{}, &models.Friendship{}, "client_client", "client_address")
 }
 
 func checkResponseCode(t *testing.T, expected int, actual int) {
@@ -65,16 +65,29 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-func TestLoginNonExistentUser(t *testing.T) {
-	clearTable("clients")
-	client := getSimpleClient()
+//func TestLoginNonExistentUser(t *testing.T) {
+//	clearTable("clients")
+//	client := getSimpleClient()
+//	payload, err := json.Marshal(client)
+//	if err != nil{
+//		t.Errorf("error occurs when encoding client: %s", err.Error())
+//	}
+//	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
+//	resp := executeRequest(req)
+//	log.Print(resp)
+//	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
+//}
+
+func UseClient(client *models.Client, t *testing.T) *models.Client {
 	payload, err := json.Marshal(client)
 	if err != nil{
 		t.Errorf("error occurs when encoding client: %s", err.Error())
 	}
-	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
+	req, _ := http.NewRequest("POST", "/api/clients/new", bytes.NewBuffer(payload))
 	resp := executeRequest(req)
 	log.Print(resp)
-	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
-
+	c := models.Client{}
+	json.NewDecoder(resp.Body).Decode(c)
+	log.Print(resp)
+	return client
 }

@@ -20,7 +20,7 @@ func clearTable(table string) {
 func clearTables() {
 	clearTable("clients")
 	clearTable("client_address")
-	clearTable("client_client")
+	clearTable("friendships")
 	clearTable("ips")
 }
 
@@ -94,6 +94,12 @@ func setFriendInClient(client *models.Client) (*models.Client,*models.Client,*mo
 	client.Friends = friends
 	return client, friend, friend2
 }
+//
+//func getFriendship(client *models.Client, friend *models.Client) *models.Friendship {
+//	return &models.Friendship{
+//		Friend:friend,
+//	}
+//}
 
 func generateFriendToNewClient(client *models.Client, nbFriends int) (*models.Client){
 	friends := make([]*models.Client, nbFriends)

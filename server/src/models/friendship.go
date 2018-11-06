@@ -1,12 +1,16 @@
 package models
 
 type Friendship struct {
-	ID			uint
-	Client 		*Client
-	Friend 		*Client		`gorm:"association_foreignkey:ID"`
+	ID 			uint
+	ClientID	uint
+	FriendID	uint
 	Accepted 	bool
 }
 
 func (*Friendship) TableName() string {
 	return "friendships"
+}
+
+func (friendship *Friendship) getFriend() (*Client, error) {
+	return GetClient(friendship.FriendID)
 }

@@ -17,6 +17,12 @@
         </button>
       </div>
 
+      <div class="register-link">
+        <router-link to="/register">
+          Don't have an account ? Create one now !
+        </router-link>
+      </div>
+
     </div>
   </div>
 </template>

@@ -1,16 +1,14 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"server/app"
 	"server/models"
-	"os"
 	"testing"
 )
 
@@ -67,58 +65,26 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-func TestLoginNonExistentUser(t *testing.T) {
+func clearTable(table string) {
+	deletion := fmt.Sprintf("DELETE FROM %s", table)
+	updateId := fmt.Sprintf("ALTER TABLE %s AUTO_INCREMENT = 1", table)
+	models.GetDB().Exec(deletion)
+	models.GetDB().Exec(updateId)
+}
+
+func clearTables() {
 	clearTable("clients")
-	client := getSimpleClient()
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
-	resp := executeRequest(req)
-	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
+	clearTable("client_address")
+	clearTable("friendships")
+	clearTable("ips")
 }
 
-func TestRegisterClients(t *testing.T) {
-	clearTables()
-	for i := 0 ; i < 3 ; i ++{
-		bufferClient := clientToBuffer(t, getSimpleClient())
-		req, _ := http.NewRequest("POST", "/api/clients/new", bufferClient)
-		resp := executeRequest(req)
-		checkResponseCode(t, http.StatusCreated, resp.Code)
-		client := &models.Client{}
-		json.NewDecoder(resp.Body).Decode(client)
-		if client == nil {
-			t.Error("Client is null")
-			return
-		}
-		clientFromDb, err := models.GetClient(client.ID)
-		if err != nil {
-			t.Errorf("Error getting client; %s", err.Error())
-			return
-		}
-		compareClient(client, clientFromDb, t)
+func getSimpleClient() *models.Client{
+	pseudo := fmt.Sprintf("test_client_%d", NbClient)
+	client := &models.Client{
+		Pseudo: pseudo,
+		Password: "test_password",
 	}
-}
-
-func clientToBuffer(t *testing.T, client *models.Client) *bytes.Buffer {
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	return bytes.NewBuffer(payload)
-}
-
-func UseClient(client *models.Client, t *testing.T) *models.Client {
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	req, _ := http.NewRequest("POST", "/api/clients/new", bytes.NewBuffer(payload))
-	resp := executeRequest(req)
-	log.Print(resp)
-	c := models.Client{}
-	json.NewDecoder(resp.Body).Decode(c)
-	log.Print(resp)
+	NbClient ++
 	return client
 }

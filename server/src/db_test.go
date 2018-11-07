@@ -10,19 +10,6 @@ import (
 )
 
 
-func clearTable(table string) {
-	deletion := fmt.Sprintf("DELETE FROM %s", table)
-	updateId := fmt.Sprintf("ALTER TABLE %s AUTO_INCREMENT = 1", table)
-	models.GetDB().Exec(deletion)
-	models.GetDB().Exec(updateId)
-}
-
-func clearTables() {
-	clearTable("clients")
-	clearTable("client_address")
-	clearTable("friendships")
-	clearTable("ips")
-}
 
 func TestGetNonExistentClient(t *testing.T) {
 	clearTable("clients")
@@ -56,16 +43,6 @@ func getSimpleIp(addr string) *models.Ip {
 		Address: addr,
 	}
 	return &Ip
-}
-
-func getSimpleClient() *models.Client{
-	pseudo := fmt.Sprintf("test_client_%d", NbClient)
-	client := &models.Client{
-		Pseudo: pseudo,
-		Password: "test_password",
-	}
-	NbClient ++
-	return client
 }
 
 func getClientWithIp() *models.Client {

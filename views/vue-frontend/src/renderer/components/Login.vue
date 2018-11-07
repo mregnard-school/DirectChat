@@ -17,6 +17,12 @@
         </button>
       </div>
 
+      <div class="register-link">
+        <router-link to="/register">
+          Don't have an account ? Create one now !
+        </router-link>
+      </div>
+
     </div>
   </div>
 </template>
@@ -42,10 +48,11 @@
             pseudo: this.pseudo,
             password: this.password,
           };
-          http.post('/login', payload)
+          http.post('/clients/login', payload)
               .then((response) => {
                 let client = response.data;
                 let peer = new Client(client);
+                // TODO irindul 2018-11-03 : store token somewhere
                 store.push({
                   peer: peer,
                 });

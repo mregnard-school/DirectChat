@@ -21,6 +21,7 @@ func (a *Application) Run(addr string) {
 }
 
 func (a *Application) InitializeRoutes() {
+	a.Router.MethodNotAllowedHandler = FuckOption()
 	a.Router.HandleFunc("/api/clients/new", controllers.CreateClient).Methods("POST")
 	a.Router.HandleFunc("/api/clients/login", controllers.Authenticate).Methods("POST")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.GetClient).Methods("GET")
@@ -28,6 +29,19 @@ func (a *Application) InitializeRoutes() {
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.DeleteClient).Methods("DELETE")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}/friends", controllers.AddFriend).Methods("POST")
 	a.Router.Use(JwtAuthentication) //attach JWT auth middleware
+}
+
+var FuckOption = func() http.Handler {
+	log.Print("Dans le middleware")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			log.Print("C'est de la merde")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+			return
+		}
+	});
 }
 
 

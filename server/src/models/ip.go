@@ -2,12 +2,17 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
+	"net/http"
 	u "server/utils"
 )
 
 type Ip struct {
 	gorm.Model
 	Address string `json:"address"`
+}
+
+func (*Ip) TableName() string {
+	return "ips"
 }
 
 func (address *Ip) Validate() (map[string] interface{}, bool){
@@ -18,7 +23,7 @@ func (address *Ip) Validate() (map[string] interface{}, bool){
 	//if err != nil {
 	//	return u.Message(false, "The client doesn't exist"), false
 	//}
-	return u.Message(false, "Requirement passed"), true
+	return u.Message(false, "Requirement passed", http.StatusOK), true
 
 }
 func (address *Ip) Create() (map[string] interface{}) {
@@ -29,9 +34,9 @@ func (address *Ip) Create() (map[string] interface{}) {
 	GetDB().Create(address)
 
 	if address.ID <= 0 {
-		return u.Message(false, "failed to create address, connection error")
+		return u.Message(false, "failed to create address, connection error", http.StatusInternalServerError)
 	}
-	response := u.Message(true, "Address has been created")
+	response := u.Message(true, "Address has been created", http.StatusCreated)
 	response["address"] = address
 	return response
 }

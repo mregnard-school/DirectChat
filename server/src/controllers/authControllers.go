@@ -2,20 +2,30 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"server/models"
-	u "server/utils"
 	"net/http"
+	u "server/utils"
+	"server/services"
 )
+
+/**
+400 -> route qui existe pas
+422-UnprocessableEntity-> données au mauvaais format
+500-> problème serveur
+ */
 
 var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 
 	client := &models.Client{}
 	err := json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
 	if err != nil {
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
+	if resp, ok := services.Validate(client); !ok {
+		u.Respond(w, resp)
+	}
+
 	newClient, err := client.Create()
 	if  err != nil {
 		u.RespondWithError(w, http.StatusInternalServerError, err.Error())
@@ -27,27 +37,16 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
 	client := &models.Client{}
-	log.Printf("client before: %s", client)
 	err := json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
-	log.Printf("client after decoding: %s", client)
 	if err != nil {
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.RespondWithError(w, http.StatusUnauthorized, "Wrong Formatting")
 		return
 	}
-	/**
-	client: &{
-	{%!s(uint=0)
-	0001-01-01 00:00:00 +0000 UTC
-	0001-01-01 00:00:00 +0000 UTC
-	<nil>}
-	batman
-	batman
-	[]
-	[] }
+	client, code, message := services.Login(client.Pseudo, client.Password)
+	if code != http.StatusOK {
+		u.RespondWithError(w, code, message)
+	}
 
-	 */
-
-	resp := models.Login(client.Pseudo, client.Password)
-	u.Respond(w, resp)
+	u.RespondWithJSON(w, code, client)
 }
 

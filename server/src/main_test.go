@@ -15,6 +15,7 @@ import (
 )
 
 var a app.Application
+var NbClient int
 
 func TestMain(m *testing.M) {
 	log.Print("Running test !")
@@ -36,6 +37,7 @@ func TestMain(m *testing.M) {
 		fmt.Print("La db n'existe pas ")
 		panic(m)
 	}
+	NbClient = 1
 	code := m.Run()
 
 	dropTables()
@@ -65,18 +67,47 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-//func TestLoginNonExistentUser(t *testing.T) {
-//	clearTable("clients")
-//	client := getSimpleClient()
-//	payload, err := json.Marshal(client)
-//	if err != nil{
-//		t.Errorf("error occurs when encoding client: %s", err.Error())
-//	}
-//	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
-//	resp := executeRequest(req)
-//	log.Print(resp)
-//	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
-//}
+func TestLoginNonExistentUser(t *testing.T) {
+	clearTable("clients")
+	client := getSimpleClient()
+	payload, err := json.Marshal(client)
+	if err != nil{
+		t.Errorf("error occurs when encoding client: %s", err.Error())
+	}
+	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
+	resp := executeRequest(req)
+	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
+}
+
+func TestRegisterClients(t *testing.T) {
+	clearTables()
+	for i := 0 ; i < 3 ; i ++{
+		bufferClient := clientToBuffer(t, getSimpleClient())
+		req, _ := http.NewRequest("POST", "/api/clients/new", bufferClient)
+		resp := executeRequest(req)
+		checkResponseCode(t, http.StatusCreated, resp.Code)
+		client := &models.Client{}
+		json.NewDecoder(resp.Body).Decode(client)
+		if client == nil {
+			t.Error("Client is null")
+			return
+		}
+		clientFromDb, err := models.GetClient(client.ID)
+		if err != nil {
+			t.Errorf("Error getting client; %s", err.Error())
+			return
+		}
+		compareClient(client, clientFromDb, t)
+	}
+}
+
+func clientToBuffer(t *testing.T, client *models.Client) *bytes.Buffer {
+	payload, err := json.Marshal(client)
+	if err != nil{
+		t.Errorf("error occurs when encoding client: %s", err.Error())
+	}
+	return bytes.NewBuffer(payload)
+}
 
 func UseClient(client *models.Client, t *testing.T) *models.Client {
 	payload, err := json.Marshal(client)

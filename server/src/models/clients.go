@@ -6,7 +6,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"os"
 	u "server/utils"
 )
 
@@ -85,40 +84,6 @@ func (client *Client) Create() (*Client, error) {
 
 	return client, nil
 }
-
-func Login(pseudo string, password string) (map[string]interface{}) {
-
-	client := &Client{}
-	err := GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
-
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Pseudo address not found")
-		}
-		return u.Message(false, "Connection error. Please retry")
-	}
-
-	GetDB().Preload("Ips").First(&client)
-	GetDB().Preload("Friends").First(&client)
-
-	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(password))
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		return u.Message(false, "Invalid login credentials. Please try again")
-	}
-	//Worked! Logged In
-	client.Password = ""
-
-	//Create JWT token
-	tk := &Token{UserId: client.ID}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	client.Token = tokenString //Store the token in the response
-
-	resp := u.Message(true, "Logged In")
-	resp["client"] = client
-	return resp
-}
-
 func GetClient(u uint) (*Client, error) {
 
 	client := &Client{}

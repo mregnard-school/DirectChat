@@ -59,10 +59,12 @@ func getSimpleIp(addr string) *models.Ip {
 }
 
 func getSimpleClient() *models.Client{
+	pseudo := fmt.Sprintf("test_client_%d", NbClient)
 	client := &models.Client{
-		Pseudo: "test_client",
+		Pseudo: pseudo,
 		Password: "test_password",
 	}
+	NbClient ++
 	return client
 }
 

@@ -19,7 +19,7 @@ func Open(username string, password string, dbName string, dbHost string) {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&Client{}, &Ip{})
+	db.Debug().AutoMigrate(&Client{}, &Ip{}, &Friendship{})
 }
 
 /**

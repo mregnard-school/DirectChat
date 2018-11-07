@@ -5,7 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
-	"os"
+	"log"
 	u "server/utils"
 )
 
@@ -19,12 +19,17 @@ type Token struct {
 //  Accounts []CustomizeAccount `gorm:"many2many:PersonAccount;foreignkey:idPerson;association_foreignkey:idAccount;association_jointable_foreignkey:account_id;jointable_foreignkey:person_id;"`
 //a struct to rep user client
 type Client struct {
-	ID 			uint	 `json:"id"`
-	Pseudo   	string   `json:"pseudo"`
-	Password 	string   `json:"password"`
-	Ips      	[]Ip     `gorm:"many2many:client_address";json:"ips"`
-	Friends  	[]Client `gorm:"many2many:client_client;association_jointable_foreignkey:friend_id";json:"friends"`
-	Token    	string   `json:"token";sql:"-"`
+	ID 			uint	 		`json:"id"`
+	Pseudo   	string   		`json:"pseudo"`
+	Password 	string   		`json:"password"`
+	Ips      	[]*Ip     		`gorm:"many2many:client_address";json:"ips"`
+	Friends  	[]*Client  		`sql:"-"`
+	Friendships	[]*Friendship
+	Token    	string   		`json:"token";sql:"-"`
+}
+
+func (*Client) TableName() string {
+	return "clients"
 }
 
 //Validate incoming user details...
@@ -61,7 +66,7 @@ func (client *Client) Create() (*Client, error) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)
-
+	client.RegisterFriends()
 	GetDB().Create(client)
 
 	if client.ID <= 0 {
@@ -79,46 +84,14 @@ func (client *Client) Create() (*Client, error) {
 
 	return client, nil
 }
-
-func Login(pseudo string, password string) (map[string]interface{}) {
-
-	client := &Client{}
-	err := GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
-
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Pseudo address not found")
-		}
-		return u.Message(false, "Connection error. Please retry")
-	}
-
-	GetDB().Preload("Ips").First(&client)
-	GetDB().Preload("Friends").First(&client)
-
-	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(password))
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		return u.Message(false, "Invalid login credentials. Please try again")
-	}
-	//Worked! Logged In
-	client.Password = ""
-
-	//Create JWT token
-	tk := &Token{UserId: client.ID}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	client.Token = tokenString //Store the token in the response
-
-	resp := u.Message(true, "Logged In")
-	resp["client"] = client
-	return resp
-}
-
 func GetClient(u uint) (*Client, error) {
 
 	client := &Client{}
 	err := GetDB().Table("clients").Where("id = ?", u).First(client).Error
-	GetDB().Preload("Ips").First(&client)
-	GetDB().Preload("Friends").First(&client)
+	if err != nil {
+		return nil, err
+	}
+	err = client.Preload()
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +101,29 @@ func GetClient(u uint) (*Client, error) {
 
 	client.Password = ""
 	return client, nil
+}
+
+func (client *Client) Preload() error {
+	err := GetDB().Preload("Ips").First(&client).Error
+	if err != nil {
+		return err
+	}
+	var friendships []*Friendship
+	client.getFriends(friendships)
+	return err
+}
+
+func (client *Client) getFriends(friendships []*Friendship) {
+	GetDB().Table("friendships").Where("client_id = ?", client.ID).Find(&friendships)
+	var friends []*Client
+	for i := 0; i < len(friendships); i++ {
+		friend, err := friendships[i].getFriend()
+		if err != nil {
+			log.Printf("Error loading friends: %s", err.Error())
+		}
+		friends = append(friends, friend)
+	}
+	client.Friends = friends
 }
 
 func GetClientFromPseudo(friend *Client) (*Client, error) {
@@ -152,7 +148,6 @@ func (client *Client) Update() (map[string] interface{})  {
 	if len(client.Ips) > 0 {
 		GetDB().Model(&client).Association("Ips").Replace(client.Ips)
 	}
-
 	GetDB().Save(&client)
 
 	resp := u.Message(true, "Client updated")
@@ -166,9 +161,10 @@ func (client *Client) Delete() (map[string] interface{}) {
 	return response
 }
 
-func (client *Client) AddFriend(friend Client) (map[string] interface{}){
+func (client *Client) AddFriend(friend *Client) (map[string] interface{}){
 	response := u.Message(true, "Client has been created")
 	client.Friends = append(client.Friends, friend)
+	client.addFriendShip(friend)
 	client.Update()
 	response["client"] = client
 	return response
@@ -190,5 +186,25 @@ func (client *Client) RemoveFriend(friend *Client) {
 	client.Friends = friends
 	client.Update()
 }
+func (client *Client) RegisterFriends() {
+	var friendships []*Friendship
+	for i:=0; i< len(client.Friends); i++ {
+		friendship := &Friendship{
+			FriendID:client.Friends[i].ID,
+			ClientID:client.ID,
+			Accepted:false,
+		}
+		friendships = append(friendships, friendship)
+	}
+	client.Friendships = friendships
+	//GetDB().Save(friendships)
+}
 
-
+func (client *Client) addFriendShip(friend *Client)  {
+	friendship := &Friendship{
+		FriendID:friend.ID,
+		ClientID:client.ID,
+		Accepted:false,
+	}
+	client.Friendships = append(client.Friendships, friendship)
+}

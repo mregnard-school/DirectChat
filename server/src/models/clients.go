@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -124,19 +123,19 @@ func (client *Client) Update() (map[string] interface{})  {
 	}
 	GetDB().Save(&client)
 
-	resp := u.Message(true, "Client updated")
+	resp := u.Message(true, "Client updated", http.StatusOK)
 	resp["client"] = client
 	return resp
 }
 
 func (client *Client) Delete() (map[string] interface{}) {
-	response := u.Message(true, "Client has been created")
+	response := u.Message(true, "Client has been deleted", http.StatusOK)
 	response["client"] = client
 	return response
 }
 
 func (client *Client) AddFriend(friend *Client) (map[string] interface{}){
-	response := u.Message(true, "Client has been created")
+	response := u.Message(true, "Client has been created", http.StatusOK)
 	client.Friends = append(client.Friends, friend)
 	client.addFriendShip(friend)
 	client.Update()

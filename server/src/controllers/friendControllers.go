@@ -27,13 +27,13 @@ var AddFriend = func(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(friend)       //decode the request body into struct and failed if any error occur
 	if err != nil {
 		log.Print(err)
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.Respond(w, u.Message(false, "Invalid request",http.StatusUnprocessableEntity))
 		return
 	}
 	friend, err = models.GetClientFromPseudo(friend)
 	if err != nil {
 		log.Print(err)
-		u.Respond(w, u.Message(false, "Invalid pseudo"))
+		u.Respond(w, u.Message(false, "Invalid pseudo", http.StatusUnprocessableEntity))
 	}
 
 	resp := client.AddFriend(friend)

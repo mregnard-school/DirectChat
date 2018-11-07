@@ -22,7 +22,7 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
-	if resp, ok := client.Validate(); !ok {
+	if resp, ok := services.Validate(client); !ok {
 		u.Respond(w, resp)
 	}
 

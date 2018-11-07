@@ -41,7 +41,7 @@ func Login(pseudo string, password string) (*models.Client, int, string) {
 }
 
 //Validate incoming user details...
-func  Validate(client *models.Client) (map[string] interface{}, bool) {
+func Validate(client *models.Client) (map[string] interface{}, bool) {
 
 	if len(client.Pseudo) < 1 {
 		return u.Message(false, "Pseudo is required", http.StatusUnprocessableEntity), false

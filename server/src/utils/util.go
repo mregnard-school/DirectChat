@@ -11,6 +11,7 @@ func Message(status bool, message string, code int) (map[string]interface{}) {
 
 func Respond(w http.ResponseWriter, data map[string] interface{})  {
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(data["code"].(int))
 	json.NewEncoder(w).Encode(data)
 }
 

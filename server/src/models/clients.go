@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"net/http"
 	u "server/utils"
 )
 
@@ -32,37 +33,10 @@ func (*Client) TableName() string {
 	return "clients"
 }
 
-//Validate incoming user details...
-func (client *Client) Validate() (map[string] interface{}, bool) {
 
-	if len(client.Pseudo) < 6 {
-		return u.Message(false, "Pseudo address is required"), false
-	}
-
-	if len(client.Password) < 6 {
-		return u.Message(false, "Password is required and need at least 6 characters"), false
-	}
-
-	//Pseudo must be unique
-	temp := &Client{}
-
-	//check for errors and duplicate pseudos
-	err := GetDB().Table("clients").Where("pseudo = ?", client.Pseudo).First(temp).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return u.Message(false, "Connection error. Please retry"), false
-	}
-	if temp.Pseudo != "" {
-		return u.Message(false, "Pseudo address already in use by another user."), false
-	}
-
-	return u.Message(false, "Requirement passed"), true
-}
 
 func (client *Client) Create() (*Client, error) {
 
-	if _, ok := client.Validate(); !ok {
-		return nil, errors.New("The client is not valid")
-	}
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)

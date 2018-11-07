@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"server/models"
+	u "server/utils"
 )
 
 func Login(pseudo string, password string) (*models.Client, int, string) {
@@ -37,4 +38,30 @@ func Login(pseudo string, password string) (*models.Client, int, string) {
 	client.Token = tokenString //Store the token in the response
 
 	return client, http.StatusOK, "Logged In"
+}
+
+//Validate incoming user details...
+func  Validate(client *models.Client) (map[string] interface{}, bool) {
+
+	if len(client.Pseudo) < 1 {
+		return u.Message(false, "Pseudo is required", http.StatusUnprocessableEntity), false
+	}
+
+	if len(client.Password) < 6 {
+		return u.Message(false, "Password is required and need at least 6 characters", http.StatusUnprocessableEntity), false
+	}
+
+	//Pseudo must be unique
+	temp := &models.Client{}
+
+	//check for errors and duplicate pseudos
+	err := models.GetDB().Table("clients").Where("pseudo = ?", client.Pseudo).First(temp).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return u.Message(false, "Connection error. Please retry", http.StatusInternalServerError), false
+	}
+	if temp.Pseudo != "" {
+		return u.Message(false, "Pseudo address already in use by another user.", http.StatusUnprocessableEntity), false
+	}
+
+	return u.Message(false, "Requirement passed", http.StatusOK), true
 }

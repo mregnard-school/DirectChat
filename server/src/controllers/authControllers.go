@@ -19,9 +19,13 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 	client := &models.Client{}
 	err := json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
 	if err != nil {
-		u.Respond(w, u.Message(false, "Invalid request"))
+		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
+	if resp, ok := client.Validate(); !ok {
+		u.Respond(w, resp)
+	}
+
 	newClient, err := client.Create()
 	if  err != nil {
 		u.RespondWithError(w, http.StatusInternalServerError, err.Error())

@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 	NbClient = 1
 	code := m.Run()
 
-	//dropTables()
+	dropTables()
 	os.Exit(code)
 }
 
@@ -54,10 +54,12 @@ func dropTables() {
 	models.GetDB().DropTable(&models.Client{}, &models.Ip{}, &models.Friendship{}, "client_client", "client_address")
 }
 
-func checkResponseCode(t *testing.T, expected int, actual int) {
+func checkResponseCode(t *testing.T, expected int, actual int) bool {
 	if expected != actual {
 		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
+		return false
 	}
+	return true
 }
 
 func executeRequest(request *http.Request) *httptest.ResponseRecorder {
@@ -110,5 +112,24 @@ func compareClient(client *models.Client, clientFromDB *models.Client, t *testin
 		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
 			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
 		}
+	}
+}
+
+func compareClientWithFriends(idClient int, client *models.Client, friends []*models.Client, t *testing.T) {
+	dbClient,_ := models.GetClient(uint(idClient))
+	var clients []models.Client
+	models.GetDB().Find(&clients)
+	if dbClient == nil {
+		t.Error("Client is empty")
+		return
+	}
+	compareClient(client, dbClient, t)
+	dbFriends := dbClient.Friends
+	if l := len(dbFriends); l != len(friends){
+		t.Errorf("Client is supposed to have '%v' friends, instead had '%v'", len(friends), l)
+		return
+	}
+	for i := 0; i < len(friends); i++ {
+		compareClient(friends[i], dbFriends[i], t)
 	}
 }

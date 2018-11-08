@@ -206,24 +206,6 @@ func TestUpdateComplexFriend(t *testing.T) {
 	toUpdate.Update()
 }
 
-func compareClientWithFriends(idClient int, client *models.Client, friends []*models.Client, t *testing.T) {
-	dbClient,_ := models.GetClient(uint(idClient))
-	var clients []models.Client
-	models.GetDB().Find(&clients)
-	if dbClient == nil {
-		t.Error("Client is empty")
-		return
-	}
-	compareClient(client, dbClient, t)
-	dbFriends := dbClient.Friends
-	if l := len(dbFriends); l != len(friends){
-		t.Errorf("Client is supposed to have '%v' friends, instead had '%v'", len(friends), l)
-	}
-	for i := 0; i < len(friends); i++ {
-		compareClient(friends[i], dbFriends[i], t)
-	}
-}
-
 func TestAddFriend(t *testing.T) {
 	clearTables()
 	_client := getSimpleClient()

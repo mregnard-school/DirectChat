@@ -122,16 +122,27 @@ func GetClientFromPseudo(friend *Client) (*Client, error) {
 	return client, nil
 }
 
-func (client *Client) Update() (map[string] interface{})  {
+func (client *Client) Update() (*Client, error)  {
 	//check if ip has changed
 	if len(client.Ips) > 0 {
-		GetDB().Model(&client).Association("Ips").Replace(client.Ips)
+		err := GetDB().Model(&client).Association("Ips").Replace(client.Ips).Error
+		if err != nil {
+			return nil, err
+		}
 	}
-	GetDB().Save(&client)
-
-	resp := u.Message(true, "Client updated", http.StatusOK)
-	resp["client"] = client
-	return resp
+	//if len(client.Friends) != len(client.Friendships) {
+	//	var friendships []*Friendship
+	//	for i:=0; i < len(client.Friends); i ++ {
+	//		friendships = append(friendships, &Friendship{
+	//			FriendID: client.Friends[i].ID,
+	//			ClientID:client.ID,
+	//			Accepted:false,
+	//		})
+	//	}
+	//	client.Friendships = friendships
+	//}
+	error := GetDB().Save(&client).Error
+	return client, error
 }
 
 func (client *Client) Delete() (map[string] interface{}) {
@@ -140,13 +151,11 @@ func (client *Client) Delete() (map[string] interface{}) {
 	return response
 }
 
-func (client *Client) AddFriend(friend *Client) (map[string] interface{}){
-	response := u.Message(true, "Client has been created", http.StatusOK)
+func (client *Client) AddFriend(friend *Client) (*Client, error){
 	client.Friends = append(client.Friends, friend)
 	client.addFriendShip(friend)
-	client.Update()
-	response["client"] = client
-	return response
+	client, err := client.Update()
+	return client, err
 }
 
 func (client *Client) RemoveFriend(friend *Client) {
@@ -166,17 +175,10 @@ func (client *Client) RemoveFriend(friend *Client) {
 	client.Update()
 }
 func (client *Client) RegisterFriends() {
-	var friendships []*Friendship
+	client.Friendships =  []*Friendship{}
 	for i:=0; i< len(client.Friends); i++ {
-		friendship := &Friendship{
-			FriendID:client.Friends[i].ID,
-			ClientID:client.ID,
-			Accepted:false,
-		}
-		friendships = append(friendships, friendship)
+		client.addFriendShip(client.Friends[i])
 	}
-	client.Friendships = friendships
-	//GetDB().Save(friendships)
 }
 
 func (client *Client) addFriendShip(friend *Client)  {

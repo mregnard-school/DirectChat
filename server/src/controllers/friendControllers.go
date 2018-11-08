@@ -36,6 +36,12 @@ var AddFriend = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Invalid pseudo", http.StatusUnprocessableEntity))
 	}
 
-	resp := client.AddFriend(friend)
-	u.Respond(w, resp)
+	resp, err := client.AddFriend(friend)
+	if err != nil {
+		log.Print(err)
+		u.Respond(w, u.Message(false, "Internal error", http.StatusInternalServerError))
+	}
+	//log.Printf("after adding friend: %v", resp)
+	//log.Printf("after adding friend err: %v", err)
+	u.RespondWithJSON(w, http.StatusOK, resp)
 }

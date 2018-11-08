@@ -74,8 +74,47 @@ func TestLoginWrongCredential(t *testing.T) {
 	}
 }
 
+//func TestUpdateFriendApi(t *testing.T) {
+//	clearTables()
+//	updateClientSent := addSimpleClient(t, "localhost")
+//	friend := addSimpleClient(t, "friend_ip")
+//	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
+//	var bearer = "Bearer " + updateClientSent.Token
+//	updateClientSent.Friends = []*models.Client{
+//		friend,
+//	}
+//	updateClientSent.Pseudo = "update_pseudo"
+//	req, _ := http.NewRequest("POST", "/api/clients/1/friends", clientToBuffer(t, friend))
+//	req.Header.Add("Authorization", bearer)
+//	resp := executeRequest(req)
+//	if !checkResponseCode(t, http.StatusOK, resp.Code){
+//		return
+//	}
+//	updateClientReceived := &models.Client{}
+//	json.NewDecoder(resp.Body).Decode(updateClientReceived)
+//	log.Printf("client received: %v", updateClientReceived)
+//	compareClient(updateClientSent, updateClientReceived, t)
+//	compareClientWithFriends(1, updateClientReceived, updateClientSent.Friends, t)
+//}
 func TestAddFriendApi(t *testing.T) {
-
+	clearTables()
+	updateClientSent := addSimpleClient(t, "localhost")
+	friend := addSimpleClient(t, "friend_ip")
+	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
+	var bearer = "Bearer " + updateClientSent.Token
+	updateClientSent.Friends = []*models.Client{
+		friend,
+	}
+	req, _ := http.NewRequest("POST", "/api/clients/1/friends", clientToBuffer(t, friend))
+	req.Header.Add("Authorization", bearer)
+	resp := executeRequest(req)
+	if !checkResponseCode(t, http.StatusOK, resp.Code){
+		return
+	}
+	updateClientReceived := &models.Client{}
+	json.NewDecoder(resp.Body).Decode(updateClientReceived)
+	compareClient(updateClientSent, updateClientReceived, t)
+	compareClientWithFriends(1, updateClientReceived, updateClientSent.Friends, t)
 }
 
 func TestMutualFriendShip(t *testing.T) {

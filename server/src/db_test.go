@@ -3,9 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"server/models"
-	"golang.org/x/crypto/bcrypt"
 	"os"
+	"server/models"
 	"testing"
 )
 
@@ -116,29 +115,6 @@ func TestCreateSimpleClient(t *testing.T) {
 	}
 	clientFromDB, _ := models.GetClient(1)
 	compareClient(client, clientFromDB, t)
-}
-
-func compareClient(client *models.Client, clientFromDB *models.Client, t *testing.T) {
-	if clientFromDB == nil {
-		t.Error("Client empty")
-		return
-	}
-	if clientFromDB.Pseudo != client.Pseudo {
-		t.Errorf("The pseudo expected was '%s', got '%s'", client.Pseudo, clientFromDB.Pseudo)
-	}
-	err := bcrypt.CompareHashAndPassword([]byte(clientFromDB.Password), []byte(client.Password))
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		t.Errorf("The password expected was '%s', got '%s'", client.Password, clientFromDB.Password)
-	}
-	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
-		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
-		return
-	}
-	for i:=0; i < len(clientFromDB.Ips); i++ {
-		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
-			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
-		}
-	}
 }
 
 func TestCreateClientWithIp(t *testing.T){

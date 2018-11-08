@@ -32,10 +32,7 @@ func (*Client) TableName() string {
 	return "clients"
 }
 
-
-
 func (client *Client) Create() (*Client, error) {
-
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)
@@ -54,8 +51,17 @@ func (client *Client) Create() (*Client, error) {
 	client.Token = tokenString
 	//for test it sucked
 	client.Password = "" //delete password
-
+	client.setEmptyValues()
 	return client, nil
+}
+
+func (client *Client) setEmptyValues() {
+	if client.Friends == nil {
+		client.Friends = []*Client{}
+	}
+	if client.Friendships == nil {
+		client.Friendships = []*Friendship{}
+	}
 }
 func GetClient(u uint) (*Client, error) {
 
@@ -71,8 +77,8 @@ func GetClient(u uint) (*Client, error) {
 	if client.Pseudo == "" { //User not found!
 		return nil, errors.New("Pseudo is empty")
 	}
-
 	client.Password = ""
+	client.setEmptyValues()
 	return client, nil
 }
 

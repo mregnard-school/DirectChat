@@ -22,6 +22,10 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
+	ip := &models.Ip{
+		Address: r.RemoteAddr,
+	}
+	client.Ips = append(client.Ips, ip)
 	if resp, ok := services.Validate(client); !ok {
 		u.Respond(w, resp)
 	}
@@ -42,7 +46,7 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 		u.RespondWithError(w, http.StatusUnauthorized, "Wrong Formatting")
 		return
 	}
-	client, code, message := services.Login(client.Pseudo, client.Password)
+	client, code, message := services.Login(client.Pseudo, client.Password, r.RemoteAddr)
 	if code != http.StatusOK {
 		u.RespondWithError(w, code, message)
 	}

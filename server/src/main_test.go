@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestMain(m *testing.M) {
 	NbClient = 1
 	code := m.Run()
 
-	dropTables()
+	//dropTables()
 	os.Exit(code)
 }
 
@@ -87,4 +88,27 @@ func getSimpleClient() *models.Client{
 	}
 	NbClient ++
 	return client
+}
+
+func compareClient(client *models.Client, clientFromDB *models.Client, t *testing.T) {
+	if clientFromDB == nil {
+		t.Error("Client empty")
+		return
+	}
+	if clientFromDB.Pseudo != client.Pseudo {
+		t.Errorf("The pseudo expected was '%s', got '%s'", client.Pseudo, clientFromDB.Pseudo)
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(clientFromDB.Password), []byte(client.Password))
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
+		t.Errorf("The password expected was '%s', got '%s'", client.Password, clientFromDB.Password)
+	}
+	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
+		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
+		return
+	}
+	for i:=0; i < len(clientFromDB.Ips); i++ {
+		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
+			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
+		}
+	}
 }

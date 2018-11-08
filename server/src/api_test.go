@@ -3,10 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
-	"testing"
 	"server/models"
+	"testing"
 )
 
 func TestLoginNonExistentUser(t *testing.T) {
@@ -41,8 +40,7 @@ func TestRegisterClients(t *testing.T) {
 func TestLoginExistingClient(t *testing.T) {
 	clearTables()
 	clientRegisterd := addSimpleClient(t, "localhost")
-	log.Printf("client registered : %v", clientRegisterd)
-	client := useClient(t, clientRegisterd)
+	client := useClient(t, clientRegisterd, "156.0.1.2")
 	clientFromDb, err := models.GetClient(client.ID)
 	if err != nil {
 		t.Errorf("Error getting client; %s", err.Error())
@@ -59,30 +57,58 @@ func clientToBuffer(t *testing.T, client *models.Client) *bytes.Buffer {
 	return bytes.NewBuffer(payload)
 }
 
-func addSimpleClient(t *testing.T, ipCLient string) *models.Client{
+func TestLoginWrongCredential(t *testing.T) {
+	clearTables()
+	client := addSimpleClient(t, "localhost")
+	c := &models.Client{
+		Pseudo: client.Pseudo,
+		Password: "wrong_password",
+	}
+	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
+	resp := executeRequest(req)
+	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
+	json.NewDecoder(resp.Body).Decode(client)
+	if client == nil {
+		t.Error("Client is null")
+		return
+	}
+}
+
+func TestAddFriendApi(t *testing.T) {
+
+}
+
+func TestMutualFriendShip(t *testing.T) {
+
+}
+
+func addSimpleClient(t *testing.T, ip string) *models.Client{
 	req, _ := http.NewRequest("POST", "/api/clients/new", clientToBuffer(t, getSimpleClient()))
-	req.RemoteAddr = ipCLient
-	//log.Printf("Ip: %s", req.RemoteAddr)
+	req.RemoteAddr = ip
 	resp := executeRequest(req)
 	c := &models.Client{}
 	json.NewDecoder(resp.Body).Decode(c)
 	return c
 }
 
-func useClient(t *testing.T, client *models.Client) *models.Client {
+func useClient(t *testing.T, client *models.Client, ip string) *models.Client {
 	c := &models.Client{
 		Pseudo: client.Pseudo,
 		Password: "test_password",
 	}
-	log.Printf("client trying to log : %v", c)
-
 	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
+	req.RemoteAddr= ip
 	resp := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, resp.Code)
 	json.NewDecoder(resp.Body).Decode(client)
 	if client == nil {
 		t.Error("Client is null")
 		return nil
+	}
+	client.Ips = []*models.Ip{
+		{
+			Address:ip,
+		},
 	}
 	return client
 }

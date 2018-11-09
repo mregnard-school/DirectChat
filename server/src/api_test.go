@@ -100,12 +100,15 @@ func TestAddFriendApi(t *testing.T) {
 	clearTables()
 	updateClientSent := addSimpleClient(t, "localhost")
 	friend := addSimpleClient(t, "friend_ip")
+	friend = &models.Client{
+		Pseudo:friend.Pseudo,
+	}
 	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
-	var bearer = "Bearer " + updateClientSent.Token
 	updateClientSent.Friends = []*models.Client{
 		friend,
 	}
 	req, _ := http.NewRequest("POST", "/api/clients/1/friends", clientToBuffer(t, friend))
+	var bearer = "Bearer " + updateClientSent.Token
 	req.Header.Add("Authorization", bearer)
 	resp := executeRequest(req)
 	if !checkResponseCode(t, http.StatusOK, resp.Code){
@@ -114,11 +117,8 @@ func TestAddFriendApi(t *testing.T) {
 	updateClientReceived := &models.Client{}
 	json.NewDecoder(resp.Body).Decode(updateClientReceived)
 	compareClient(updateClientSent, updateClientReceived, t)
-	compareClientWithFriends(1, updateClientReceived, updateClientSent.Friends, t)
-}
 
-func TestMutualFriendShip(t *testing.T) {
-
+	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)
 }
 
 func addSimpleClient(t *testing.T, ip string) *models.Client{

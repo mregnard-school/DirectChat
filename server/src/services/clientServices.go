@@ -22,7 +22,7 @@ func Login(pseudo string, password string, _ip string) (*models.Client, int, str
 		return nil, http.StatusInternalServerError, "Server Error"
 	}
 
-	client.Preload()
+	client.Preload(true)
 	if _ip != "" {
 		ip := &models.Ip{
 			Address: _ip,

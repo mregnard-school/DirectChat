@@ -106,6 +106,7 @@ func compareClient(client *models.Client, clientFromDB *models.Client, t *testin
 	}
 	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
 		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
+		t.Errorf("for the client :%d", client.ID)
 		return
 	}
 	for i:=0; i < len(clientFromDB.Ips); i++ {
@@ -117,8 +118,8 @@ func compareClient(client *models.Client, clientFromDB *models.Client, t *testin
 
 func compareClientWithFriends(idClient int, client *models.Client, friends []*models.Client, t *testing.T) {
 	dbClient,_ := models.GetClient(uint(idClient))
-	var clients []models.Client
-	models.GetDB().Find(&clients)
+	//var clients []models.Client
+	//models.GetDB().Find(&clients)
 	if dbClient == nil {
 		t.Error("Client is empty")
 		return

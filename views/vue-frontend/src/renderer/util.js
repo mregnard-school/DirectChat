@@ -28,9 +28,9 @@ const userAuthed = (client) => {
 
 const peerCreated = (peer) => {
   if(!peer.client.ips[0]) {
-    peer.client.ips[0] = '127.0.0.1:5000';
+    peer.client.ips[0].address = '127.0.0.1:5000';
   }
-  const port = parseIpAndPortFromString(peer.client.ips[0]).port;
+  const port = parseIpAndPortFromString(peer.client.ips[0].address).port;
   peer.runServer(port);
   
   peer.client.friends.forEach(friend => {

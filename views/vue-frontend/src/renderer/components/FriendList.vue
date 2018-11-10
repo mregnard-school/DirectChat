@@ -44,6 +44,7 @@
 <script>
   import Modal from 'components/Modal';
   import {http} from '@/axios-wrapper';
+  import store from '@/mutableStore';
   export default {
     name: "FriendList",
     components: {
@@ -66,13 +67,12 @@
         return this.connected.concat(this.disconnected);
       },
       clientId() {
-        return this.state.peer.client.id;
+        return store.state.peer.client.id;
       }
     },
     methods: {
       handleAddNewFriend() {
         if(this.addFriend !== '') {
-          console.log('clicked');
           // TODO irindul 2018-11-08 : Test when backend has been updated
           http.post(`/clients/${this.clientId}/friends`, {
             pseudo: this.addFriend,

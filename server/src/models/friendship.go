@@ -3,10 +3,10 @@ package models
 import "errors"
 
 type Friendship struct {
-	ID 			uint
-	ClientID	uint
-	FriendID	uint
-	Accepted 	bool
+	ID 			uint	`json:"id"`
+	ClientID	uint	`json:"clientId"`
+	FriendID	uint	`json:"friendId"`
+	Accepted 	bool	`json:"accepted"`
 }
 
 func (*Friendship) TableName() string {

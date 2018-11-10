@@ -122,7 +122,9 @@ func TestCreateSimpleClient(t *testing.T) {
 	clearTable("ips")
 	clearTable("client_address")
 	client :=  getSimpleClient()
+	log.Print("Avant create")
 	returnClient, err := client.Create()
+	log.Print("Après create")
 
 	if err != nil {
 		t.Errorf("Error when creating the client: %s", err)
@@ -131,6 +133,7 @@ func TestCreateSimpleClient(t *testing.T) {
 		t.Errorf("The password should be empty, instead got '%s'", returnClient.Password)
 	}
 	clientFromDB, _ := models.GetClient(1)
+	log.Print("Avant compare client")
 	compareClient(client, clientFromDB, t)
 }
 

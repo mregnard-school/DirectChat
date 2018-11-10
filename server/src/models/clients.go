@@ -110,6 +110,11 @@ func (client *Client) getFriends(friendships []*Friendship) {
 		if err != nil {
 			log.Printf("Error loading friends: %s", err.Error())
 		}
+		// User doesn't need to know the friends of his friend
+		//friend.Friends = []*Client{}
+		if friend != nil {
+			friend.Friendships = []*Friendship{}
+		}
 		friends = append(friends, friend)
 	}
 	client.Friends = friends
@@ -199,7 +204,6 @@ func (client *Client) RegisterFriends() {
 
 func (client *Client) addFriendShip(friend *Client) {
 	accepted := false
-	log.Print("addFriendship call getClient")
 	friendships, err := friend.getFriendship()
 	if err != nil {
 		log.Printf("Trouble in client::addFriendship: %v", err)

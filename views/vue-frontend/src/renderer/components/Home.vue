@@ -69,7 +69,9 @@
       disconnect() {
         this.$store.commit('removeFriends');
         this.$store.commit('removeToken');
+        store.state.peer.node.closeServer();
         store.clean();
+        // TODO irindul 2018-11-10 : Call logout on server
       }
     }
   }

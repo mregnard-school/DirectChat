@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	u "server/utils"
+	"strings"
 )
 
 /*
@@ -29,8 +30,14 @@ type Client struct {
 	Token       string        `json:"token";sql:"-"`
 }
 
+var defaultPort = 5000
+
 func (*Client) TableName() string {
 	return "clients"
+}
+
+func (client *Client) GetId() int {
+	return int(client.ID)
 }
 
 func (client *Client) Create() (*Client, error) {
@@ -39,7 +46,12 @@ func (client *Client) Create() (*Client, error) {
 	client.Password = string(hashedPassword)
 	client.RegisterFriends()
 	GetDB().Create(client)
-
+	for i := 0; i < len(client.Ips); i++ {
+		var ip = client.Ips[i]
+		ip.Address = strings.Split(ip.Address, ":")[0]
+		ip.Port = defaultPort + int(client.ID)
+	}
+	client.Update()
 	if client.ID <= 0 {
 
 		return nil, errors.New("Failed to create client, connection error.")

@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"server/models"
-	u "server/utils"
 	"log"
 	"net/http"
+	"server/models"
+	u "server/utils"
 	"strconv"
 )
 
@@ -21,14 +21,14 @@ var UpdateClient = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
-	json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
+	json.NewDecoder(r.Body).Decode(client)       //decode the request body into struct and failed if any error occur
 	if err != nil {
 		log.Print(err)
 		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
 	updatedClient, err := client.Update()
-	if err != nil{
+	if err != nil {
 		log.Print(err)
 		u.Respond(w, u.Message(false, "Internal Error", http.StatusInternalServerError))
 		return
@@ -68,4 +68,8 @@ var GetClient = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.RespondWithJSON(w, http.StatusOK, client)
+}
+
+var Logout = func(w http.ResponseWriter, r *http.Request) {
+	//@TODO
 }

@@ -2,13 +2,13 @@ package app
 
 import (
 	"github.com/gorilla/mux"
-	"server/controllers"
 	"log"
 	"net/http"
+	"server/controllers"
 )
 
 type Application struct {
-	Router 	*mux.Router
+	Router *mux.Router
 }
 
 func (a *Application) Initialize() {
@@ -28,6 +28,7 @@ func (a *Application) InitializeRoutes() {
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.UpdateClient).Methods("PUT")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}", controllers.DeleteClient).Methods("DELETE")
 	a.Router.HandleFunc("/api/clients/{id:[0-9]}/friends", controllers.AddFriend).Methods("POST")
+	a.Router.HandleFunc("/api/clients/{id:[0-9]}/logout", controllers.Logout).Methods("PUT")
 	a.Router.Use(JwtAuthentication) //attach JWT auth middleware
 }
 
@@ -41,9 +42,5 @@ var FuckOption = func() http.Handler {
 			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 			return
 		}
-	});
+	})
 }
-
-
-
-

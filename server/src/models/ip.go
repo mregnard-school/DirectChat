@@ -1,21 +1,21 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
 	"net/http"
 	u "server/utils"
 )
 
 type Ip struct {
-	gorm.Model
+	ID      uint
 	Address string `json:"address"`
+	Port    int    `json:"port"`
 }
 
 func (*Ip) TableName() string {
 	return "ips"
 }
 
-func (address *Ip) Validate() (map[string] interface{}, bool){
+func (address *Ip) Validate() (map[string]interface{}, bool) {
 
 	//temp := &Address{}
 	//err := GetDB().Table("clients").Where("id = ?", address.Address).First(temp).Error
@@ -26,7 +26,7 @@ func (address *Ip) Validate() (map[string] interface{}, bool){
 	return u.Message(false, "Requirement passed", http.StatusOK), true
 
 }
-func (address *Ip) Create() (map[string] interface{}) {
+func (address *Ip) Create() map[string]interface{} {
 	if resp, ok := address.Validate(); !ok {
 		return resp
 	}
@@ -49,4 +49,3 @@ func GetIp(u uint) *Ip {
 	}
 	return address
 }
-

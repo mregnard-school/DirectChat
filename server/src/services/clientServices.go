@@ -8,7 +8,10 @@ import (
 	"os"
 	"server/models"
 	u "server/utils"
+	"strings"
 )
+
+var defaultPort = 5000
 
 func Login(pseudo string, password string, _ip string) (*models.Client, int, string) {
 
@@ -24,8 +27,11 @@ func Login(pseudo string, password string, _ip string) (*models.Client, int, str
 
 	client.Preload(true)
 	if _ip != "" {
+		_ip = strings.Split(_ip, ":")[0]
+		var port = client.GetId() + defaultPort
 		ip := &models.Ip{
 			Address: _ip,
+			Port:    port,
 		}
 		client.Ips = []*models.Ip{ip}
 	}
@@ -47,7 +53,7 @@ func Login(pseudo string, password string, _ip string) (*models.Client, int, str
 }
 
 //Validate incoming user details...
-func Validate(client *models.Client) (map[string] interface{}, bool) {
+func Validate(client *models.Client) (map[string]interface{}, bool) {
 
 	if len(client.Pseudo) < 1 {
 		return u.Message(false, "Pseudo is required", http.StatusUnprocessableEntity), false

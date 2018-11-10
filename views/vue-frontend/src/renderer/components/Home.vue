@@ -2,6 +2,12 @@
   <div class="home">
     <div class="information">
       <h1>Hello {{this.client.pseudo}} !</h1>
+
+      <div class="loggout" @click.stop="disconnect">
+        <router-link to="/" class="link">
+          Log out
+        </router-link>
+      </div>
     </div>
 
     <div class="dashboard">
@@ -59,6 +65,11 @@
         socket.client.ips = [];
         socket.client.isConnected = false;
         this.$store.commit('disconnectFriend', JSON.parse(JSON.stringify(socket.client)));
+      },
+      disconnect() {
+        this.$store.commit('removeFriends');
+        this.$store.commit('removeToken');
+        store.clean();
       }
     }
   }

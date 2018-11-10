@@ -56,8 +56,9 @@
                 let client = response.data;
                 userAuthed(client);
               })
-              .catch(() => {
+              .catch((error) => {
                 this.error = true;
+                console.log(error);
               })
         }
       },

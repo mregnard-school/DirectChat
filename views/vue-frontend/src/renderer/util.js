@@ -36,12 +36,24 @@ const peerCreated = (peer) => {
   const port = parseIpAndPortFromString(peer.client.ips[0].address).port;
   peer.runServer(port);
   
+  let portFriend = 5001;
   peer.client.friends.forEach(friend => {
+    
+    friend.ips = JSON.parse(JSON.stringify(friend.Ips || [])); //Because GORM SUCKS A BIG FAT BAG OF DICKS
+    if(friend.ips.length === 0) {
+  
+      friend.ips.push({
+        address: `127.0.0.1:${portFriend}`
+      });
+      portFriend++;
+    }
     if (friend.ips.length !== 0) {
       friend.ips.forEach(ipPort => {
-        const parsed = parseIpAndPortFromString(ipPort);
+        const parsed = parseIpAndPortFromString(ipPort.address);
         peer.node.connectTo(parsed.ip, parsed.port);
       })
+    } else {
+    
     }
   });
 };

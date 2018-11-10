@@ -27,9 +27,14 @@ var UpdateClient = func(w http.ResponseWriter, r *http.Request) {
 		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
 		return
 	}
-
-	resp := client.Update()
-	u.Respond(w, resp)
+	updatedClient, err := client.Update()
+	if err != nil{
+		log.Print(err)
+		u.Respond(w, u.Message(false, "Internal Error", http.StatusInternalServerError))
+		return
+	}
+	log.Printf("client:%v", client)
+	u.RespondWithJSON(w, http.StatusOK, updatedClient)
 }
 
 var DeleteClient = func(w http.ResponseWriter, r *http.Request) {

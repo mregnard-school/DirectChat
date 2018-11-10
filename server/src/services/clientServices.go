@@ -10,7 +10,7 @@ import (
 	u "server/utils"
 )
 
-func Login(pseudo string, password string) (*models.Client, int, string) {
+func Login(pseudo string, password string, _ip string) (*models.Client, int, string) {
 
 	client := &models.Client{}
 	err := models.GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
@@ -22,8 +22,14 @@ func Login(pseudo string, password string) (*models.Client, int, string) {
 		return nil, http.StatusInternalServerError, "Server Error"
 	}
 
-	client.Preload()
-
+	client.Preload(true)
+	if _ip != "" {
+		ip := &models.Ip{
+			Address: _ip,
+		}
+		client.Ips = []*models.Ip{ip}
+	}
+	client.Update()
 	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
 		return nil, http.StatusUnauthorized, "Wrong password"

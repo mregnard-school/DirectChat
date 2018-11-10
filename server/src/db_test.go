@@ -2,53 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"log"
 	"server/models"
-	"golang.org/x/crypto/bcrypt"
-	"os"
 	"testing"
 )
 
 
-func clearTable(table string) {
-	deletion := fmt.Sprintf("DELETE FROM %s", table)
-	updateId := fmt.Sprintf("ALTER TABLE %s AUTO_INCREMENT = 1", table)
-	models.GetDB().Exec(deletion)
-	models.GetDB().Exec(updateId)
-}
 
-func clearTables() {
-	clearTable("clients")
-	clearTable("client_address")
-	clearTable("friendships")
-	clearTable("ips")
-}
 
-func TestGetNonExistentClient(t *testing.T) {
-	clearTable("clients")
-}
-
-func GetToken(id int) string {
-	tk := &models.Token{UserId: uint(id)}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	return tokenString
-}
-func TestCreateIp(t *testing.T) {
-	clearTable("ips")
-	Ip := getSimpleIp("localhost")
-
-	models.GetDB().Create(&Ip)
-
-	db_ip := &models.Ip{}
-	err := models.GetDB().Table("ips").Where("id = ?", 1).First(db_ip).Error
-	if err != nil {
-		t.Errorf("Error when getting ip: '%v'", err)
-	}
-	if db_ip.Address != Ip.Address {
-		t.Errorf("Expected ip: '%s', got '%s'", Ip.Address, db_ip.Address)
-	}
-
+func addClient(client *models.Client) *models.Client{
+	r, _ := client.Create()
+	result, _ := models.GetClient(r.ID)
+	return result
 }
 
 func getSimpleIp(addr string) *models.Ip {
@@ -56,16 +21,6 @@ func getSimpleIp(addr string) *models.Ip {
 		Address: addr,
 	}
 	return &Ip
-}
-
-func getSimpleClient() *models.Client{
-	pseudo := fmt.Sprintf("test_client_%d", NbClient)
-	client := &models.Client{
-		Pseudo: pseudo,
-		Password: "test_password",
-	}
-	NbClient ++
-	return client
 }
 
 func getClientWithIp() *models.Client {
@@ -123,13 +78,53 @@ func getClientWithFriends() (*models.Client,*models.Client,*models.Client) {
 	return setFriendInClient(client)
 }
 
+func compareClient2Friends(client *models.Client, t *testing.T, f_friend *models.Client, s_friend *models.Client) {
+	dbClient,_ := models.GetClient(3)
+	clients := []models.Client{}
+	models.GetDB().Find(&clients)
+	if dbClient == nil {
+		t.Error("Client is empty")
+		return
+	}
+	compareClient(client, dbClient, t)
+	friends := dbClient.Friends
+	if l := len(friends); l != 2 {
+		t.Errorf("Client is supposed to have 2 friends, instead had '%d'", l)
+	}
+	compareClient(f_friend, friends[0], t)
+	compareClient(s_friend, friends[1], t)
+}
+
+
+
+func TestGetNonExistentClient(t *testing.T) {
+	clearTable("clients")
+}
+func TestCreateIp(t *testing.T) {
+	clearTable("ips")
+	Ip := getSimpleIp("localhost")
+
+	models.GetDB().Create(&Ip)
+
+	db_ip := &models.Ip{}
+	err := models.GetDB().Table("ips").Where("id = ?", 1).First(db_ip).Error
+	if err != nil {
+		t.Errorf("Error when getting ip: '%v'", err)
+	}
+	if db_ip.Address != Ip.Address {
+		t.Errorf("Expected ip: '%s', got '%s'", Ip.Address, db_ip.Address)
+	}
+
+}
 
 func TestCreateSimpleClient(t *testing.T) {
 	clearTable("clients")
 	clearTable("ips")
 	clearTable("client_address")
 	client :=  getSimpleClient()
+	log.Print("Avant create")
 	returnClient, err := client.Create()
+	log.Print("Après create")
 
 	if err != nil {
 		t.Errorf("Error when creating the client: %s", err)
@@ -138,30 +133,8 @@ func TestCreateSimpleClient(t *testing.T) {
 		t.Errorf("The password should be empty, instead got '%s'", returnClient.Password)
 	}
 	clientFromDB, _ := models.GetClient(1)
+	log.Print("Avant compare client")
 	compareClient(client, clientFromDB, t)
-}
-
-func compareClient(client *models.Client, clientFromDB *models.Client, t *testing.T) {
-	if clientFromDB == nil {
-		t.Error("Client empty")
-		return
-	}
-	if clientFromDB.Pseudo != client.Pseudo {
-		t.Errorf("The pseudo expected was '%s', got '%s'", client.Pseudo, clientFromDB.Pseudo)
-	}
-	err := bcrypt.CompareHashAndPassword([]byte(clientFromDB.Password), []byte(client.Password))
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		t.Errorf("The password expected was '%s', got '%s'", client.Password, clientFromDB.Password)
-	}
-	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
-		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
-		return
-	}
-	for i:=0; i < len(clientFromDB.Ips); i++ {
-		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
-			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
-		}
-	}
 }
 
 func TestCreateClientWithIp(t *testing.T){
@@ -184,23 +157,6 @@ func TestCreateClientWithFriends(t *testing.T) {
 	client.Create()
 
 	compareClient2Friends(client, t, f_friend, s_friend)
-}
-
-func compareClient2Friends(client *models.Client, t *testing.T, f_friend *models.Client, s_friend *models.Client) {
-	dbClient,_ := models.GetClient(3)
-	clients := []models.Client{}
-	models.GetDB().Find(&clients)
-	if dbClient == nil {
-		t.Error("Client is empty")
-		return
-	}
-	compareClient(client, dbClient, t)
-	friends := dbClient.Friends
-	if l := len(friends); l != 2 {
-		t.Errorf("Client is supposed to have 2 friends, instead had '%d'", l)
-	}
-	compareClient(f_friend, friends[0], t)
-	compareClient(s_friend, friends[1], t)
 }
 
 func TestUpdateSimpleClient(t *testing.T) {
@@ -253,24 +209,6 @@ func TestUpdateComplexFriend(t *testing.T) {
 	toUpdate.Update()
 }
 
-func compareClientWithFriends(idClient int, client *models.Client, friends []*models.Client, t *testing.T) {
-	dbClient,_ := models.GetClient(uint(idClient))
-	var clients []models.Client
-	models.GetDB().Find(&clients)
-	if dbClient == nil {
-		t.Error("Client is empty")
-		return
-	}
-	compareClient(client, dbClient, t)
-	dbFriends := dbClient.Friends
-	if l := len(dbFriends); l != len(friends){
-		t.Errorf("Client is supposed to have '%v' friends, instead had '%v'", len(friends), l)
-	}
-	for i := 0; i < len(friends); i++ {
-		compareClient(friends[i], dbFriends[i], t)
-	}
-}
-
 func TestAddFriend(t *testing.T) {
 	clearTables()
 	_client := getSimpleClient()
@@ -280,13 +218,50 @@ func TestAddFriend(t *testing.T) {
 	newFriend :=  getSimpleClient()
 	newFriend.Pseudo = "new friend"
 	newFriend.Create()
-	_client.AddFriend(newFriend)
+	client, err := _client.AddFriend(newFriend)
+	if err != nil {
+		t.Errorf("Eror when adding a friend %v", err)
+		return
+	}
 	friends = append(friends, newFriend)
-	compareClientWithFriends(4, _client, friends, t)
+	compareClientWithFriends(4, client, friends, t)
+	for i:= 0; i < len(client.Friendships); i++ {
+		if client.Friendships[i].Accepted {
+			t.Errorf("This friendship %v with the friend %v is not supposed to be accepted for this client : %v", client.Friendships[i], client.Friends[i], client)
+		}
+	}
 }
 
-func addClient(client *models.Client) *models.Client{
-	r, _ := client.Create()
-	result, _ := models.GetClient(r.ID)
-	return result
+func TestMutualFriendShip(t *testing.T) {
+	clearTables()
+	client := addSimpleClient(t, "localhost")
+	friend := addSimpleClient(t, "friend_ip")
+	friend, err  := friend.AddFriend(client)
+	if	friend.Friendships[0].Accepted {
+		t.Errorf("Friend was not add but is accepted %v", friend.Friends[0])
+	}
+	if err != nil {
+		t.Errorf("Error when addding friend %v", err)
+		return
+	}
+	log.Print("avant le add friend")
+	client, err = client.AddFriend(friend)
+	log.Print("Après le add friend")
+	friend, err = models.GetClient(2)
+	log.Print("Après le get client")
+
+	if err != nil {
+		t.Errorf("Error when addding friend %v", err)
+		return
+	}
+	if	!client.Friendships[0].Accepted {
+		t.Errorf("Friend was add but isn't accepted %v", client.Friends[0])
+	}
+	if	!friend.Friendships[0].Accepted {
+		t.Errorf("Friend was add but isn't accepted %v", friend.Friends[0])
+	}
+}
+
+func TestGetClientByPseudo(t *testing.T) {
+
 }

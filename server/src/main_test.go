@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"server/app"
 	"server/models"
-	"os"
 	"testing"
 )
 
@@ -55,10 +54,12 @@ func dropTables() {
 	models.GetDB().DropTable(&models.Client{}, &models.Ip{}, &models.Friendship{}, "client_client", "client_address")
 }
 
-func checkResponseCode(t *testing.T, expected int, actual int) {
+func checkResponseCode(t *testing.T, expected int, actual int) bool {
 	if expected != actual {
 		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
+		return false
 	}
+	return true
 }
 
 func executeRequest(request *http.Request) *httptest.ResponseRecorder {
@@ -67,58 +68,69 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-func TestLoginNonExistentUser(t *testing.T) {
+func clearTable(table string) {
+	deletion := fmt.Sprintf("DELETE FROM %s", table)
+	updateId := fmt.Sprintf("ALTER TABLE %s AUTO_INCREMENT = 1", table)
+	models.GetDB().Exec(deletion)
+	models.GetDB().Exec(updateId)
+}
+
+func clearTables() {
 	clearTable("clients")
-	client := getSimpleClient()
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
-	resp := executeRequest(req)
-	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
+	clearTable("client_address")
+	clearTable("friendships")
+	clearTable("ips")
 }
 
-func TestRegisterClients(t *testing.T) {
-	clearTables()
-	for i := 0 ; i < 3 ; i ++{
-		bufferClient := clientToBuffer(t, getSimpleClient())
-		req, _ := http.NewRequest("POST", "/api/clients/new", bufferClient)
-		resp := executeRequest(req)
-		checkResponseCode(t, http.StatusCreated, resp.Code)
-		client := &models.Client{}
-		json.NewDecoder(resp.Body).Decode(client)
-		if client == nil {
-			t.Error("Client is null")
-			return
-		}
-		clientFromDb, err := models.GetClient(client.ID)
-		if err != nil {
-			t.Errorf("Error getting client; %s", err.Error())
-			return
-		}
-		compareClient(client, clientFromDb, t)
+func getSimpleClient() *models.Client{
+	pseudo := fmt.Sprintf("test_client_%d", NbClient)
+	client := &models.Client{
+		Pseudo: pseudo,
+		Password: "test_password",
 	}
-}
-
-func clientToBuffer(t *testing.T, client *models.Client) *bytes.Buffer {
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	return bytes.NewBuffer(payload)
-}
-
-func UseClient(client *models.Client, t *testing.T) *models.Client {
-	payload, err := json.Marshal(client)
-	if err != nil{
-		t.Errorf("error occurs when encoding client: %s", err.Error())
-	}
-	req, _ := http.NewRequest("POST", "/api/clients/new", bytes.NewBuffer(payload))
-	resp := executeRequest(req)
-	log.Print(resp)
-	c := models.Client{}
-	json.NewDecoder(resp.Body).Decode(c)
-	log.Print(resp)
+	NbClient ++
 	return client
+}
+
+func compareClient(client *models.Client, clientFromDB *models.Client, t *testing.T) {
+	if clientFromDB == nil {
+		t.Error("Client empty")
+		return
+	}
+	if clientFromDB.Pseudo != client.Pseudo {
+		t.Errorf("The pseudo expected was '%s', got '%s'", client.Pseudo, clientFromDB.Pseudo)
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(clientFromDB.Password), []byte(client.Password))
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
+		t.Errorf("The password expected was '%s', got '%s'", client.Password, clientFromDB.Password)
+	}
+	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
+		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
+		t.Errorf("for the client :%d", client.ID)
+		return
+	}
+	for i:=0; i < len(clientFromDB.Ips); i++ {
+		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
+			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
+		}
+	}
+}
+
+func compareClientWithFriends(idClient int, client *models.Client, friends []*models.Client, t *testing.T) {
+	dbClient,_ := models.GetClient(uint(idClient))
+	//var clients []models.Client
+	//models.GetDB().Find(&clients)
+	if dbClient == nil {
+		t.Error("Client is empty")
+		return
+	}
+	compareClient(client, dbClient, t)
+	dbFriends := dbClient.Friends
+	if l := len(dbFriends); l != len(friends){
+		t.Errorf("Client is supposed to have '%v' friends, instead had '%v'", len(friends), l)
+		return
+	}
+	for i := 0; i < len(friends); i++ {
+		compareClient(friends[i], dbFriends[i], t)
+	}
 }

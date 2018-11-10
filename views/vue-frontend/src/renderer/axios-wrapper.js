@@ -21,20 +21,22 @@ class Wrapper {
   }
   
   setToken() {
-    this.serviceAxios.interceptors.request.use(
+    axios.defaults.headers.common['Authorization'] = `Bearer ${store.state.Auth.token}`;
+    /*this.serviceAxios.interceptors.request.use(
         config => {
           config.baseURL = 'http://localhost:8000/api'; // TODO irindul 2018-11-03 : Retrieve from env.js
           const token = store.state.Auth.token;
           if (token) {
-            config.headers.Authorization = 'bearer ' + token;
+            config.headers.Authorization = 'Bearer ' + token;
           }
+          config.headers.Samere = 'Swag';
         
           return config;
         },
         error => {
           return Promise.reject(error);
         }
-    );
+    );*/
   }
   
   handleError(error) {
@@ -47,5 +49,6 @@ class Wrapper {
 }
 
 //const http = new Wrapper().service;
-const http = new Wrapper().serviceAxios;
-export {http};
+const wrapper = new Wrapper();
+const http = wrapper.serviceAxios;
+export {http, wrapper};

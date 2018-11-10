@@ -20,13 +20,13 @@ type Token struct {
 //  Accounts []CustomizeAccount `gorm:"many2many:PersonAccount;foreignkey:idPerson;association_foreignkey:idAccount;association_jointable_foreignkey:account_id;jointable_foreignkey:person_id;"`
 //a struct to rep user client
 type Client struct {
-	ID          uint      `json:"id"`
-	Pseudo      string    `json:"pseudo"`
-	Password    string    `json:"password"`
-	Ips         []*Ip     `gorm:"many2many:client_address";json:"ips"`
-	Friends     []*Client `sql:"-"`
-	Friendships []*Friendship
-	Token       string `json:"token";sql:"-"`
+	ID          uint          `json:"id"`
+	Pseudo      string        `json:"pseudo"`
+	Password    string        `json:"password"`
+	Ips         []*Ip         `gorm:"many2many:client_address" json:"ips"`
+	Friends     []*Client     `sql:"-" json:"friends"`
+	Friendships []*Friendship `json:"friendships"`
+	Token       string        `json:"token";sql:"-"`
 }
 
 func (*Client) TableName() string {
@@ -159,7 +159,7 @@ func (client *Client) Update() (*Client, error) {
 	return client, error
 }
 
-func (client *Client) Delete() (map[string]interface{}) {
+func (client *Client) Delete() map[string]interface{} {
 	response := u.Message(true, "Client has been deleted", http.StatusOK)
 	response["client"] = client
 	return response
@@ -182,7 +182,7 @@ func (client *Client) AddFriend(friend *Client) (*Client, error) {
 func (client *Client) RemoveFriend(friend *Client) {
 	friends := client.Friends
 	indice := -1
-	for i := 0; i < len(friends); i ++ {
+	for i := 0; i < len(friends); i++ {
 		if friend.ID == friends[i].ID {
 			indice = i
 		}
@@ -208,7 +208,7 @@ func (client *Client) addFriendShip(friend *Client) {
 	if err != nil {
 		log.Printf("Trouble in client::addFriendship: %v", err)
 	}
-	for i := 0; i < len(friendships); i ++ {
+	for i := 0; i < len(friendships); i++ {
 		log.Printf("On est dans la boucle for: %d", i)
 		if friendships[i].FriendID == client.ID {
 			accepted = true

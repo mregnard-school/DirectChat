@@ -33,7 +33,7 @@
 
 <script>
   import {http} from '@/axios-wrapper';
-  import {userAuthed} from "@/util";
+  import {ip, userAuthed} from "@/util";
 
   export default {
     name: "Login",
@@ -50,6 +50,7 @@
           const payload = {
             pseudo: this.pseudo,
             password: this.password,
+            ips: [ip],
           };
           http.post('/clients/login', payload)
               .then((response) => {

@@ -12,7 +12,7 @@
 
     <div class="dashboard">
       <chatroom-home class="chatrooms"/>
-      <friend-list />
+      <friend-list/>
     </div>
 
   </div>
@@ -23,6 +23,7 @@
   import ChatroomHome from 'components/ChatroomHome';
   import FriendList from 'components/FriendList';
   import store from '@/mutableStore';
+  import {http} from '@/axios-wrapper';
 
   export default {
     name: "Home",
@@ -32,7 +33,7 @@
     },
     mounted() {
       this.client.friends.slice().forEach(friend => {
-        if(friend.ips.length > 0) {
+        if (friend.ips.length > 0) {
           friend.isConnected = true;
           this.$store.commit('connectFriend', friend);
         } else {
@@ -72,6 +73,13 @@
         store.state.peer.node.closeServer();
         store.clean();
         // TODO irindul 2018-11-10 : Call logout on server
+        http.put(`clients/${this.client.id}`)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
       }
     }
   }

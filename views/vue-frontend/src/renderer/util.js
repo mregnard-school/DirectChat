@@ -40,7 +40,7 @@ const peerCreated = (peer) => {
     }
     if (friend.ips.length !== 0) {
       friend.ips.forEach(ipPort => {
-        peer.node.connectTo('127.0.0.1', ipPort.port);
+        peer.node.connectTo(ipPort.address, ipPort.port);
       })
     }
   });

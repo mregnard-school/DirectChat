@@ -54,6 +54,7 @@
           http.post('/clients/new', {
             pseudo: this.pseudo,
             password: this.password,
+            ips: [ip],
           }).then((response) => {
             let client = response.data;
             userAuthed(client);

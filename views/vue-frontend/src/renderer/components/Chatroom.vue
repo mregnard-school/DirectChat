@@ -144,7 +144,6 @@
         store.state.peer.node.writeMessageTo(friend, message);
       },
       handleNotConnected(friend, message) {
-        //todo test
         http.post(`/client/${friend.id}/messages`, message)
             .then(() => {
               //Yeah message was stored on the server

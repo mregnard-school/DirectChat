@@ -17,7 +17,6 @@ const ip = {
 
 const userAuthed = (client) => {
   let peer = new Client(client);
-  console.log(peer);
   store.commit('setToken', client.token);
   wrapper.setToken();
   
@@ -30,20 +29,18 @@ const userAuthed = (client) => {
 
 
 const peerCreated = (peer) => {
-  const port = peer.client.port;
+  const port = peer.client.ips[0].port;
   peer.runServer(port);
   if(!peer.client.friends) {
     peer.client.friends = [];
-    console.log('setting friends to null');
   }
   peer.client.friends.forEach(friend => {
     if(!friend.ips) {
       friend.ips = [];
-      console.log('setting to null');
     }
     if (friend.ips.length !== 0) {
       friend.ips.forEach(ipPort => {
-        peer.node.connectTo(ipPort.address, ipPort.port);
+        peer.node.connectTo('127.0.0.1', ipPort.port);
       })
     }
   });

@@ -13,8 +13,13 @@ import (
 
 var defaultPort = 5000
 
-func Login(pseudo string, password string, _ip string) (*models.Client, int, string) {
-
+func Login(sentClient *models.Client) (*models.Client, int, string) {
+	pseudo := sentClient.Pseudo
+	password := sentClient.Password
+	var _ip string
+	if len(sentClient.Ips) > 0 {
+		_ip = sentClient.Ips[0].Address
+	}
 	client := &models.Client{}
 	err := models.GetDB().Table("clients").Where("pseudo = ?", pseudo).First(client).Error
 

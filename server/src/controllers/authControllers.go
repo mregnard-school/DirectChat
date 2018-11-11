@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"encoding/json"
-	"server/models"
 	"net/http"
-	u "server/utils"
+	"server/models"
 	"server/services"
+	u "server/utils"
 )
 
 /**
 400 -> route qui existe pas
 422-UnprocessableEntity-> données au mauvaais format
 500-> problème serveur
- */
+*/
 
 var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 
@@ -32,7 +32,7 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newClient, err := client.Create()
-	if  err != nil {
+	if err != nil {
 		u.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -47,7 +47,7 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 		u.RespondWithError(w, http.StatusUnauthorized, "Wrong Formatting")
 		return
 	}
-	client, code, message := services.Login(client.Pseudo, client.Password, r.RemoteAddr)
+	client, code, message := services.Login(client)
 	if code != http.StatusOK {
 		u.RespondWithError(w, code, message)
 		return
@@ -55,4 +55,3 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
 	u.RespondWithJSON(w, code, client)
 }
-

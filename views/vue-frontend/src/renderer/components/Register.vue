@@ -33,9 +33,11 @@
 </template>
 
 <script>
-  import {http} from 'p2p/services/axios-wrapper';
+  import {http} from '@/axios-wrapper';
   import store from '@/mutableStore';
   import {ip} from '@/util';
+  import Client from 'p2p/client/client';
+  import {userAuthed} from '@/util';
 
   export default {
     name: "Register",
@@ -54,20 +56,14 @@
             password: this.password,
           }).then((response) => {
             let client = response.data;
-            let peer = new Client(client);
-            // TODO irindul 2018-11-03 : store token somewhere
-            store.push({
-              peer: peer,
-            });
-            this.peerCreated(peer);
-            this.$router.push('/home');
+            userAuthed(client);
           }).catch((error) => {
             console.error(error);
           })
         } else {
           //Notify user with validation error
         }
-      }
+      },
     }
   }
 </script>

@@ -11,6 +11,10 @@
         <input v-model.trim="password" type="password" id="password" placeholder="Enter password"/>
       </div>
 
+      <div class="error" v-if="error">
+        Could not sign in, please check credentials
+      </div>
+
       <div class="login-submit">
         <button @click="login">
           Log in
@@ -28,10 +32,8 @@
 </template>
 
 <script>
-  const http = require('p2p/services/axios-wrapper').http;
-  import store from '@/mutableStore';
-  import Client from 'p2p/client/client';
-  import {parseIpAndPortFromString} from 'p2p/services/util';
+  import {http} from '@/axios-wrapper';
+  import {userAuthed} from "@/util";
 
   export default {
     name: "Login",
@@ -39,6 +41,7 @@
       return {
         pseudo: 'Billy',
         password: 'azerty',
+        error: false,
       }
     },
     methods: {
@@ -51,28 +54,21 @@
           http.post('/clients/login', payload)
               .then((response) => {
                 let client = response.data;
-                let peer = new Client(client);
-                // TODO irindul 2018-11-03 : store token somewhere
-                store.push({
-                  peer: peer,
-                });
-                this.peerCreated(peer);
-                this.$router.push('/home');
+                userAuthed(client);
+              })
+              .catch((error) => {
+                this.error = true;
+                console.log(error);
               })
         }
       },
-      peerCreated(peer) {
-        const port = parseIpAndPortFromString(peer.client.ips[0]).port;
-        peer.runServer(port);
-
-        peer.client.friends.forEach(friend => {
-          if (friend.ips.length !== 0) {
-            friend.ips.forEach(ipPort => {
-              const parsed = parseIpAndPortFromString(ipPort);
-              peer.node.connectTo(parsed.ip, parsed.port);
-            })
-          }
-        });
+    },
+    watch: {
+      pseudo: function() {
+        this.error = false;
+      },
+      password: function() {
+        this.error = false;
       }
     }
   }

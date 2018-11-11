@@ -16,6 +16,10 @@ const mutations = {
     state.connected = state.connected.filter(amigo => amigo.id !== friend.id);
     state.disconnected.push(friend);
   },
+  removeFriends(state) {
+    state.connected = [];
+    state.disconnected = [];
+  }
 };
 
 const getters = {};

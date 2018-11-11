@@ -37,7 +37,7 @@
 </template>
 <script>
 
-  const http = require('p2p/services/axios-wrapper').http;
+  const http = require('@/axios-wrapper').http;
   import Client from 'p2p/client/client';
   import Message from 'components/Message';
   import store from '@/mutableStore';

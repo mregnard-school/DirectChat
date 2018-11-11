@@ -5,6 +5,9 @@ const store = {
       ...store.state,
       ...key,
     }
+  },
+  clean: () => {
+    store.state = {};
   }
 };
 

@@ -94,6 +94,12 @@ func GetClient(u uint) (*Client, error) {
 	return client, nil
 }
 
+func (client *Client) Logout() {
+	GetDB().Delete(client.Ips)
+	GetDB().Model(&client).Association("Ips").Clear()
+	client.Ips = []*Ip{}
+}
+
 func (client *Client) getFriendship() ([]*Friendship, error) {
 	var friendships []*Friendship
 	err := GetDB().Table("friendships").Where("client_id = ?", client.ID).Find(&friendships).Error
@@ -221,7 +227,6 @@ func (client *Client) addFriendShip(friend *Client) {
 		log.Printf("Trouble in client::addFriendship: %v", err)
 	}
 	for i := 0; i < len(friendships); i++ {
-		log.Printf("On est dans la boucle for: %d", i)
 		if friendships[i].FriendID == client.ID {
 			accepted = true
 		}

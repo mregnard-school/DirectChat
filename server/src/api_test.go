@@ -12,7 +12,7 @@ func TestLoginNonExistentUser(t *testing.T) {
 	clearTable("clients")
 	client := getSimpleClient()
 	payload, err := json.Marshal(client)
-	if err != nil{
+	if err != nil {
 		t.Errorf("error occurs when encoding client: %s", err.Error())
 	}
 	req, _ := http.NewRequest("POST", "/api/clients/login", bytes.NewBuffer(payload))
@@ -22,7 +22,7 @@ func TestLoginNonExistentUser(t *testing.T) {
 
 func TestRegisterClients(t *testing.T) {
 	clearTables()
-	for i := 0 ; i < 3 ; i ++{
+	for i := 0; i < 3; i++ {
 		client := addSimpleClient(t, "localhost")
 		if client == nil {
 			t.Error("Client is null")
@@ -51,7 +51,7 @@ func TestLoginExistingClient(t *testing.T) {
 
 func clientToBuffer(t *testing.T, client *models.Client) *bytes.Buffer {
 	payload, err := json.Marshal(client)
-	if err != nil{
+	if err != nil {
 		t.Errorf("error occurs when encoding client: %s", err.Error())
 	}
 	return bytes.NewBuffer(payload)
@@ -61,7 +61,7 @@ func TestLoginWrongCredential(t *testing.T) {
 	clearTables()
 	client := addSimpleClient(t, "localhost")
 	c := &models.Client{
-		Pseudo: client.Pseudo,
+		Pseudo:   client.Pseudo,
 		Password: "wrong_password",
 	}
 	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
@@ -101,7 +101,7 @@ func TestAddFriendApi(t *testing.T) {
 	updateClientSent := addSimpleClient(t, "localhost")
 	friend := addSimpleClient(t, "friend_ip")
 	friend = &models.Client{
-		Pseudo:friend.Pseudo,
+		Pseudo: friend.Pseudo,
 	}
 	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
 	updateClientSent.Friends = []*models.Client{
@@ -111,7 +111,7 @@ func TestAddFriendApi(t *testing.T) {
 	var bearer = "Bearer " + updateClientSent.Token
 	req.Header.Add("Authorization", bearer)
 	resp := executeRequest(req)
-	if !checkResponseCode(t, http.StatusOK, resp.Code){
+	if !checkResponseCode(t, http.StatusOK, resp.Code) {
 		return
 	}
 	updateClientReceived := &models.Client{}
@@ -121,7 +121,20 @@ func TestAddFriendApi(t *testing.T) {
 	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)
 }
 
-func addSimpleClient(t *testing.T, ip string) *models.Client{
+func TestLogoutApi(t *testing.T) {
+	clearTables()
+	newClient := addSimpleClient(t, "localhost")
+	updateClientSent := useClient(t, newClient, "swaf")
+	req, _ := http.NewRequest("PUT", "/api/clients/1/logout", nil)
+	var bearer = "Bearer " + updateClientSent.Token
+	req.Header.Add("Authorization", bearer)
+	resp := executeRequest(req)
+	if !checkResponseCode(t, http.StatusOK, resp.Code) {
+		return
+	}
+}
+
+func addSimpleClient(t *testing.T, ip string) *models.Client {
 	req, _ := http.NewRequest("POST", "/api/clients/new", clientToBuffer(t, getSimpleClient()))
 	req.RemoteAddr = ip
 	resp := executeRequest(req)
@@ -132,11 +145,11 @@ func addSimpleClient(t *testing.T, ip string) *models.Client{
 
 func useClient(t *testing.T, client *models.Client, ip string) *models.Client {
 	c := &models.Client{
-		Pseudo: client.Pseudo,
+		Pseudo:   client.Pseudo,
 		Password: "test_password",
 	}
 	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
-	req.RemoteAddr= ip
+	req.RemoteAddr = ip
 	resp := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, resp.Code)
 	json.NewDecoder(resp.Body).Decode(client)
@@ -146,7 +159,7 @@ func useClient(t *testing.T, client *models.Client, ip string) *models.Client {
 	}
 	client.Ips = []*models.Ip{
 		{
-			Address:ip,
+			Address: ip,
 		},
 	}
 	return client

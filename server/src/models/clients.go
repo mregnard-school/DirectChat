@@ -6,6 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"os"
 	u "server/utils"
 	"strings"
 )
@@ -60,15 +61,14 @@ func (client *Client) Create() (*Client, error) {
 	//Create new JWT token for the newly registered client
 	tk := &Token{UserId: client.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(hashedPassword))
+	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	client.Token = tokenString
-	//for test it sucked
-	client.Password = "" //delete password
 	client.setEmptyValues()
 	return client, nil
 }
 
 func (client *Client) setEmptyValues() {
+	client.Password = ""
 	if client.Friends == nil {
 		client.Friends = []*Client{}
 	}
@@ -89,7 +89,6 @@ func GetClient(u uint) (*Client, error) {
 	if client.Pseudo == "" { //User not found!
 		return nil, errors.New("Pseudo is empty")
 	}
-	client.Password = ""
 	client.setEmptyValues()
 	return client, nil
 }
@@ -162,17 +161,6 @@ func (client *Client) Update() (*Client, error) {
 			return nil, err
 		}
 	}
-	//if len(client.Friends) != len(client.Friendships) {	//@TODO find a way to know which whether a friend was add or already there
-	//	var friendships []*Friendship
-	//	for i:=0; i < len(client.Friends); i ++ {
-	//		friendships = append(friendships, &Friendship{
-	//			FriendID: client.Friends[i].ID,
-	//			ClientID:client.ID,
-	//			Accepted:false,
-	//		})
-	//	}
-	//	client.Friendships = friendships
-	//}
 	error := GetDB().Save(&client).Error
 	return client, error
 }

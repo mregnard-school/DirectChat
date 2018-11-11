@@ -34,6 +34,11 @@ func TestRegisterClients(t *testing.T) {
 			return
 		}
 		compareClient(client, clientFromDb, t)
+		var bearer = "Bearer " + client.Token
+		req, _ := http.NewRequest("PUT", "/api/clients/1/logout", nil)
+		req.Header.Add("Authorization", bearer)
+		resp := executeRequest(req)
+		checkResponseCode(t, http.StatusOK, resp.Code)
 	}
 }
 

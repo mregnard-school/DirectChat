@@ -72,8 +72,7 @@
         this.$store.commit('removeToken');
         store.state.peer.node.closeServer();
         store.clean();
-        // TODO irindul 2018-11-10 : Call logout on server
-        http.put(`clients/${this.client.id}`)
+        http.put(`clients/${this.client.id}/logout`)
             .then((response) => {
               console.log(response);
             })

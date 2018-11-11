@@ -16,8 +16,6 @@ const ip = {
 };
 
 const userAuthed = (client) => {
-  client.ips = JSON.parse(JSON.stringify(client.Ips || [])); //Because GORM SUCKS A BIG FAT BAG OF DICKS
-  client.friends = JSON.parse(JSON.stringify(client.Friends || []));
   let peer = new Client(client);
   store.commit('setToken', client.token);
   wrapper.setToken();
@@ -29,31 +27,21 @@ const userAuthed = (client) => {
   router.push('/home');
 };
 
+
 const peerCreated = (peer) => {
-  if(!peer.client.ips[0]) {
-    peer.client.ips[0].address = '127.0.0.1:5000';
-  }
-  const port = parseIpAndPortFromString(peer.client.ips[0].address).port;
+  const port = peer.client.ips[0].port;
   peer.runServer(port);
-  
-  let portFriend = 5001;
+  if(!peer.client.friends) {
+    peer.client.friends = [];
+  }
   peer.client.friends.forEach(friend => {
-    
-    friend.ips = JSON.parse(JSON.stringify(friend.Ips || [])); //Because GORM SUCKS A BIG FAT BAG OF DICKS
-    if(friend.ips.length === 0) {
-  
-      friend.ips.push({
-        address: `127.0.0.1:${portFriend}`
-      });
-      portFriend++;
+    if(!friend.ips) {
+      friend.ips = [];
     }
     if (friend.ips.length !== 0) {
       friend.ips.forEach(ipPort => {
-        const parsed = parseIpAndPortFromString(ipPort.address);
-        peer.node.connectTo(parsed.ip, parsed.port);
+        peer.node.connectTo('127.0.0.1', ipPort.port);
       })
-    } else {
-    
     }
   });
 };

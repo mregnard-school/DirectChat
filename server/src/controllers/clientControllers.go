@@ -13,28 +13,34 @@ import (
 
 var UpdateClient = func(w http.ResponseWriter, r *http.Request) {
 
+	client, successful := processPostClient(w, r)
+	if !successful {
+		return
+	}
+	log.Printf("client:%v", client)
+	updatedClient, err := client.Update()
+	if err != nil {
+		log.Printf("Error updating client: %v", err)
+	}
+	u.RespondWithJSON(w, http.StatusOK, updatedClient)
+}
+
+func processPostClient(w http.ResponseWriter, r *http.Request) (*models.Client, bool) {
 	client := &models.Client{}
 	vars := mux.Vars(r)
 	_, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		u.RespondWithError(w, http.StatusBadRequest, "Invalid user ID")
-		return
+		return nil, false
 	}
 	err = json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
 	json.NewDecoder(r.Body).Decode(client)       //decode the request body into struct and failed if any error occur
 	if err != nil {
 		log.Print(err)
 		u.Respond(w, u.Message(false, "Invalid request", http.StatusUnprocessableEntity))
-		return
+		return nil, false
 	}
-	updatedClient, err := client.Update()
-	if err != nil {
-		log.Print(err)
-		u.Respond(w, u.Message(false, "Internal Error", http.StatusInternalServerError))
-		return
-	}
-	log.Printf("client:%v", client)
-	u.RespondWithJSON(w, http.StatusOK, updatedClient)
+	return client, true
 }
 
 var DeleteClient = func(w http.ResponseWriter, r *http.Request) {
@@ -71,5 +77,17 @@ var GetClient = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var Logout = func(w http.ResponseWriter, r *http.Request) {
-	//@TODO
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		u.RespondWithError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+	client, err := models.GetClient(uint(id))
+	if err != nil {
+		u.Message(false, "Stay with us !", http.StatusInternalServerError)
+		return
+	}
+	client.Logout()
+	u.Message(false, "Goodby", http.StatusOK)
 }

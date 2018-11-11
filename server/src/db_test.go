@@ -7,10 +7,7 @@ import (
 	"testing"
 )
 
-
-
-
-func addClient(client *models.Client) *models.Client{
+func addClient(client *models.Client) *models.Client {
 	r, _ := client.Create()
 	result, _ := models.GetClient(r.ID)
 	return result
@@ -27,7 +24,7 @@ func getClientWithIp() *models.Client {
 	return set2IpToClient(getSimpleClient(), "127.0.0.1", "localhost")
 }
 
-func set2IpToClient(client *models.Client, _ip1 string, _ip2 string) *models.Client{
+func set2IpToClient(client *models.Client, _ip1 string, _ip2 string) *models.Client {
 	ip1 := getSimpleIp(_ip1)
 	ip2 := getSimpleIp(_ip2)
 	ips := make([]*models.Ip, 2)
@@ -37,20 +34,21 @@ func set2IpToClient(client *models.Client, _ip1 string, _ip2 string) *models.Cli
 	return client
 }
 
-func setFriendInClient(client *models.Client) (*models.Client,*models.Client,*models.Client){
+func setFriendInClient(client *models.Client) (*models.Client, *models.Client, *models.Client) {
 	_friend1 := getSimpleClient()
 	_friend1.Create()
 	_friend2 := getSimpleClient()
 	_friend2.Pseudo = "test_client_2"
 	_friend2.Create()
-	friend,_ := models.GetClient(uint(1))
-	friend2,_ := models.GetClient(uint(2))
+	friend, _ := models.GetClient(uint(1))
+	friend2, _ := models.GetClient(uint(2))
 	friends := make([]*models.Client, 2)
 	friends[0] = friend
 	friends[1] = friend2
 	client.Friends = friends
 	return client, friend, friend2
 }
+
 //
 //func getFriendship(client *models.Client, friend *models.Client) *models.Friendship {
 //	return &models.Friendship{
@@ -58,9 +56,9 @@ func setFriendInClient(client *models.Client) (*models.Client,*models.Client,*mo
 //	}
 //}
 
-func generateFriendToNewClient(client *models.Client, nbFriends int) (*models.Client){
+func generateFriendToNewClient(client *models.Client, nbFriends int) *models.Client {
 	friends := make([]*models.Client, nbFriends)
-	for i := 0; i < nbFriends; i ++ {
+	for i := 0; i < nbFriends; i++ {
 		tmp_f := getSimpleClient()
 		tmp_f.Pseudo = fmt.Sprintf("%s_%d", tmp_f.Pseudo, i)
 		tmp_f.Create()
@@ -71,15 +69,14 @@ func generateFriendToNewClient(client *models.Client, nbFriends int) (*models.Cl
 	return client
 }
 
-
-func getClientWithFriends() (*models.Client,*models.Client,*models.Client) {
+func getClientWithFriends() (*models.Client, *models.Client, *models.Client) {
 	client := getSimpleClient()
 	client.Pseudo = "client_with_Friend"
 	return setFriendInClient(client)
 }
 
 func compareClient2Friends(client *models.Client, t *testing.T, f_friend *models.Client, s_friend *models.Client) {
-	dbClient,_ := models.GetClient(3)
+	dbClient, _ := models.GetClient(3)
 	clients := []models.Client{}
 	models.GetDB().Find(&clients)
 	if dbClient == nil {
@@ -95,11 +92,6 @@ func compareClient2Friends(client *models.Client, t *testing.T, f_friend *models
 	compareClient(s_friend, friends[1], t)
 }
 
-
-
-func TestGetNonExistentClient(t *testing.T) {
-	clearTable("clients")
-}
 func TestCreateIp(t *testing.T) {
 	clearTable("ips")
 	Ip := getSimpleIp("localhost")
@@ -121,10 +113,8 @@ func TestCreateSimpleClient(t *testing.T) {
 	clearTable("clients")
 	clearTable("ips")
 	clearTable("client_address")
-	client :=  getSimpleClient()
-	log.Print("Avant create")
+	client := getSimpleClient()
 	returnClient, err := client.Create()
-	log.Print("Après create")
 
 	if err != nil {
 		t.Errorf("Error when creating the client: %s", err)
@@ -133,11 +123,10 @@ func TestCreateSimpleClient(t *testing.T) {
 		t.Errorf("The password should be empty, instead got '%s'", returnClient.Password)
 	}
 	clientFromDB, _ := models.GetClient(1)
-	log.Print("Avant compare client")
 	compareClient(client, clientFromDB, t)
 }
 
-func TestCreateClientWithIp(t *testing.T){
+func TestCreateClientWithIp(t *testing.T) {
 	clearTable("clients")
 	clearTable("ips")
 	clearTable("client_address")
@@ -195,7 +184,7 @@ func TestUpdateClientWithIp(t *testing.T) {
 		t.Errorf("Expected 1 client, got '%d'", l)
 		return
 	}
-	clientFromDB,_ := models.GetClient(1)
+	clientFromDB, _ := models.GetClient(1)
 	compareClient(client, clientFromDB, t)
 }
 
@@ -214,8 +203,8 @@ func TestAddFriend(t *testing.T) {
 	_client := getSimpleClient()
 	_client = generateFriendToNewClient(_client, 3)
 	_client.Create()
-	friends :=  _client.Friends
-	newFriend :=  getSimpleClient()
+	friends := _client.Friends
+	newFriend := getSimpleClient()
 	newFriend.Pseudo = "new friend"
 	newFriend.Create()
 	client, err := _client.AddFriend(newFriend)
@@ -225,7 +214,7 @@ func TestAddFriend(t *testing.T) {
 	}
 	friends = append(friends, newFriend)
 	compareClientWithFriends(4, client, friends, t)
-	for i:= 0; i < len(client.Friendships); i++ {
+	for i := 0; i < len(client.Friendships); i++ {
 		if client.Friendships[i].Accepted {
 			t.Errorf("This friendship %v with the friend %v is not supposed to be accepted for this client : %v", client.Friendships[i], client.Friends[i], client)
 		}
@@ -236,32 +225,56 @@ func TestMutualFriendShip(t *testing.T) {
 	clearTables()
 	client := addSimpleClient(t, "localhost")
 	friend := addSimpleClient(t, "friend_ip")
-	friend, err  := friend.AddFriend(client)
-	if	friend.Friendships[0].Accepted {
+	friend, err := friend.AddFriend(client)
+	if friend.Friendships[0].Accepted {
 		t.Errorf("Friend was not add but is accepted %v", friend.Friends[0])
 	}
 	if err != nil {
 		t.Errorf("Error when addding friend %v", err)
 		return
 	}
-	log.Print("avant le add friend")
 	client, err = client.AddFriend(friend)
-	log.Print("Après le add friend")
 	friend, err = models.GetClient(2)
-	log.Print("Après le get client")
 
 	if err != nil {
 		t.Errorf("Error when addding friend %v", err)
 		return
 	}
-	if	!client.Friendships[0].Accepted {
+	if !client.Friendships[0].Accepted {
 		t.Errorf("Friend was add but isn't accepted %v", client.Friends[0])
 	}
-	if	!friend.Friendships[0].Accepted {
+	if !friend.Friendships[0].Accepted {
 		t.Errorf("Friend was add but isn't accepted %v", friend.Friends[0])
 	}
 }
 
 func TestGetClientByPseudo(t *testing.T) {
+
+}
+
+func TestLogout(t *testing.T) {
+	clearTables()
+	client := getClientWithIp()
+	_, err := client.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	client.Logout()
+	clientFromDb, _ := models.GetClient(1)
+	if len(clientFromDb.Ips) != 0 {
+		log.Printf("client ips length is %d", len(clientFromDb.Ips))
+		for i := 0; i < len(clientFromDb.Ips); i++ {
+			log.Printf("ip : %v", clientFromDb.Ips[i])
+		}
+		t.Errorf("ip of client should be empty")
+	}
+	compareClient(client, clientFromDb, t)
+	var ips []models.Ip
+	models.GetDB().Find(&ips)
+	if len(ips) != 0 {
+		t.Errorf("There are still %d ips", len(ips))
+		t.Errorf("ips: %v", ips)
+	}
+	//log.Printf("ips:%v", ips)
 
 }

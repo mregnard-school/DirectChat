@@ -33,7 +33,6 @@ func (a *Application) InitializeRoutes() {
 }
 
 var FuckOption = func() http.Handler {
-	log.Print("Dans le middleware")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "OPTIONS" {
 			log.Print("C'est de la merde")

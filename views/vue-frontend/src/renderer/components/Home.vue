@@ -1,9 +1,19 @@
 <template>
   <div class="home">
-    <div class="information">
-      <h1>Hello {{this.client.pseudo}} !</h1>
+    <div class="information-home">
 
-      <div class="loggout" @click.stop="disconnect">
+      <div class="user">
+        <h1>
+          <span class="welcome">
+            Welcome
+          </span>
+          <span class="pseudo">
+          {{this.client.pseudo}}
+          </span>
+        </h1>
+      </div>
+
+      <div class="logout" @click.stop="disconnect">
         <router-link to="/" class="link">
           Log out
         </router-link>
@@ -97,15 +107,36 @@
   .home {
     display: flex;
     flex-direction: column;
-    background: $primaryColor;
+    background: $primaryLightColor;
     height: 100%;
 
-    .information {
-      text-align: center;
-      flex: 1;
-      h1 {
-        font-size: 16px;
-        font-weight: 500;
+    .information-home {
+      display: flex;
+      .user {
+        flex: 1;
+        padding: 5px 5px 5px 10px;
+        h1 {
+          font-size: 18px;
+          font-weight: 300;
+          .pseudo {
+            font-weight: 700;
+          }
+        }
+      }
+
+      .logout {
+        flex: 1;
+        justify-self: flex-end;
+        text-align: end;
+        padding: 5px 10px 5px 5px;
+        align-self: center;
+        a {
+          color: $accentColor;
+          text-decoration: none;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
 

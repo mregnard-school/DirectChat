@@ -1,14 +1,22 @@
 <template>
   <div class="login">
+    <div class="information">
+      <h1>
+        DirectChat
+      </h1>
+
+      <p>
+        Chat with your friends in a purely decentralized way !
+      </p>
+    </div>
+
     <div class="login-form" @keypress.enter="login">
       <div class="login-input">
-        <label for="pseudo">Pseudo</label>
-        <input v-model.trim="pseudo" autofocus type="text" id="pseudo" placeholder="Enter your pseudo...">
+        <input v-model.trim="pseudo" autofocus type="text" id="pseudo" placeholder="Pseudo">
       </div>
 
       <div class="login-input">
-        <label for="password">Password</label>
-        <input v-model.trim="password" type="password" id="password" placeholder="Enter password"/>
+        <input v-model.trim="password" type="password" id="password" placeholder="Password"/>
       </div>
 
       <div class="error" v-if="error">
@@ -39,8 +47,8 @@
     name: "Login",
     data() {
       return {
-        pseudo: 'Billy',
-        password: 'azerty',
+        pseudo: '',
+        password: '',
         error: false,
       }
     },
@@ -79,6 +87,7 @@
   @import '~styles/global';
 
   .login {
+
     display: flex;
     position: absolute;
     justify-content: center;
@@ -86,14 +95,37 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: $primaryColor;
+    background: $primaryLightColor;
+    flex-direction: column;
+    .information {
+
+      h1 {
+        align-self: center;
+        margin: 0;
+      }
+
+      p {
+        font-size: $fontSize;;
+        color: $secondaryText;
+      }
+      display: flex;
+      flex-direction: column;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 0;
+      padding-bottom: 10px;
+    }
+
     .login-form {
       display: flex;
       flex-direction: column;
-      margin: auto;
+      margin-left: auto;
+      margin-right: auto;
       padding: 30px;
       border-radius: 5px;
       background: $primaryLightColor;
+      border: 1px solid $lightGrey;
+      box-shadow: 10px 5px 5px $lightGrey;
       .login-input {
         display: flex;
         flex-direction: column;
@@ -101,19 +133,41 @@
         margin-bottom: 15px;
 
         input {
-          font-size: 16px;
+          font-size: $fontSize;;
           max-width: 300px;
+          min-height: 25px;
+          padding: 10px;
+          border-radius: 3px;
+          border: 1px solid $dividerColor;
         }
 
         label {
-          font-size: 15px;
+          font-size: $fontSize;;
         }
       }
 
       .login-submit {
         min-width: 55.2px;
         max-width: 100px;
-        align-self: flex-end;
+        align-self: center;
+        button {
+          font-size: 20px;
+          font-weight: 500;
+          background: none;
+          color: $accentColor;
+        }
+      }
+
+      .register-link {
+        padding-top: 5px;
+        a {
+          color: $accentColor;
+          text-decoration: none;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
       }
     }
   }

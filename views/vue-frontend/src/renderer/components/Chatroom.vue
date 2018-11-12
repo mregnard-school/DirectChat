@@ -174,35 +174,49 @@
         font-size: 17px;
         font-weight: 600;
       }
+
+      input {
+        border-radius: 5px;
+        padding: 10px;
+        font-size: $fontSize;
+        background: $primaryBox;
+        text-align: center;
+      }
     }
 
     .chatroom-container {
+
       flex: 8;
       background: $primaryLightColor;
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 10px;
       max-height: 80%;
+      z-index: 0;
 
       .conversation {
+        padding: 15px;
         overflow: auto;
-        max-height: 100%;
+        max-height: 98%;
       }
     }
 
     .sendBox {
+      flex: 1;
+
       .sendBox-input {
         display: flex;
         flex-direction: row;
-        align-self: flex-end;
-        input{
+        align-content: flex-end;
+        justify-self: flex-end;
+        input {
           flex: 6;
           border-radius: 5px;
           padding: 10px;
           font-size: $fontSize;
           background: $primaryBox;
         }
-        button{
+        button {
           flex: 1;
         }
       }

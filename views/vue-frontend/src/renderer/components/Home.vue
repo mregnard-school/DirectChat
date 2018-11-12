@@ -80,10 +80,10 @@
         store.clean();
         http.put(`clients/${this.client.id}/logout`)
             .then((response) => {
-              console.log(response);
+
             })
             .catch((error) => {
-              console.log(error);
+
             });
       }
     }

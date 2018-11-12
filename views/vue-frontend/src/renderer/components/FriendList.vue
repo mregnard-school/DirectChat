@@ -38,7 +38,7 @@
       </div>
 
       <div slot="footer">
-        <button class="btn" @click.stop="handleAddNewFriend"  >
+        <button class="btn" @click.stop="handleAddNewFriend">
           OK
         </button>
       </div>
@@ -88,15 +88,12 @@
               return friend.id;
             });
 
-            console.log('old', oldFriendIds);
-
             client.friends
                 .filter(friend => {
                   return !oldFriendIds.includes(friend.id);
                 })
                 .forEach(friend => {
-                  console.log('friend alledgly filtered', friend);
-                  if(friend.ips && friend.ips.length > 0) {
+                  if (friend.ips && friend.ips.length > 0) {
                     this.$emit('new-connected', friend);
                   } else {
                     this.$emit('new-disconnected', friend);

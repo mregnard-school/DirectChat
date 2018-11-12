@@ -3,6 +3,7 @@ package models
 import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
+	"time"
 
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -13,9 +14,12 @@ func Open(username string, password string, dbName string, dbHost string) {
 	dbUri := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", username, password, dbHost,  dbName)
 
 	conn, err := gorm.Open("mysql", dbUri)
-	if err != nil {
+	for err != nil {
 		fmt.Print(err)
 		log.Print(err)
+		time.Sleep(1 *time.Second)
+		conn, err = gorm.Open("mysql", dbUri)
+		log.Print("waiting for connexion")
 	}
 
 	db = conn

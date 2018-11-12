@@ -263,9 +263,18 @@
       overflow: auto;
 
       .chatrooms-search {
-        margin: 4px;
-      }
-      .chatroom-thumbnail {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        align-self: center;
+        input {
+          font-size: 14px;
+          width: 100%;
+          max-width: 500px;
+          box-sizing: border-box;
+          padding: 10px;
+          border-radius: 7px;
+          background: $primaryBox;
+        }
       }
 
       .fab {

@@ -148,6 +148,7 @@
 
       .chatrooms {
         flex: 4;
+
       }
       .friends {
         flex: 1;

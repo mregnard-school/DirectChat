@@ -113,7 +113,7 @@
             name: this.conversation.name,
             friends: this.conversation.friends,
           },
-          date: moment().format("YYYY-mm-DD HH:mm:ss"),
+          date: moment().format("YYYY-MM-DD HH:mm:ss").toString(),
           author: {
             id: store.state.peer.client.id,
             pseudo: store.state.peer.client.pseudo,

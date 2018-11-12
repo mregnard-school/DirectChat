@@ -69,7 +69,12 @@
         return this.chatroom.name.charAt(0);
       },
       hour() {
-        return moment(this.message.date).format('HH:mm');
+        let date = moment(this.message.date);
+        if(date.isBefore(moment())) {
+          return moment(date).format('HH:mm');
+        } else {
+          return moment(date).format('ddd');
+        }
       }
 
     },
@@ -86,24 +91,28 @@
 
   .thumbnail {
     padding: 5px;
-    margin-top: 2px;
     text-align: center;
+
+    &:hover {
+      background: $primaryBox;
+    }
 
     .thumbnail-info {
       display: flex;
       flex-direction: row;
       .thumbnail-icon {
+        $iconSize: 30px;
         background: $chathead;
         border-radius: 50%;
         text-align: center;
-        min-width: 50px;
-        max-width: 50px;
-        min-height: 50px;
-        max-height: 50px;
+        min-width: $iconSize;
+        max-width: $iconSize;
+        min-height: $iconSize;
+        max-height: $iconSize;
         flex: 1;
         padding: 5px;
         .thumbnail-name {
-          padding-top: 30%;
+          padding-top: 15%;
         }
       }
 
@@ -157,9 +166,5 @@
         }
       }
     }
-
-
-
-
   }
 </style>

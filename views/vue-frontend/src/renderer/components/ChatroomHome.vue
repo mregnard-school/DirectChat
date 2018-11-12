@@ -6,7 +6,8 @@
         <input type="text" v-model="filter" placeholder="Search...">
       </div>
       <div v-for="chatroom in conversations">
-        <chatroom-thumbnail class="chatroom-thumbnail"
+        <chatroom-thumbnail
+                            :class="isSelectedChatroom(chatroom)"
                             :chatroom="chatroom"
                             @select-chatroom="changeChatroom"
         />
@@ -70,6 +71,17 @@
       changeChatroom(chatroom) {
         let wrapper = this.chatrooms.find(wrapper => wrapper.conversation.id === chatroom.id);
         this.selectedChatroom = wrapper;
+      },
+      isSelectedChatroom(chatroom) {
+        console.log(chatroom);
+        const classes = "chatroom-thumbnail ";
+        if(this.selectedChatroom) {
+          if(this.selectedChatroom.conversation.id === chatroom.id) {
+            return classes + 'active';
+          }
+        }
+        return classes;
+
       },
       setLastMessage(chatroom, message) {
         this.conversations.filter(chtroom => chtroom.id === chatroom.id)
@@ -273,6 +285,12 @@
           box-sizing: border-box;
           padding: 10px;
           border-radius: 7px;
+          background: $primaryBox;
+        }
+      }
+
+      .chatroom-thumbnail {
+        &.active {
           background: $primaryBox;
         }
       }

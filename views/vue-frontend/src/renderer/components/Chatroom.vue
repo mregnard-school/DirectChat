@@ -24,11 +24,8 @@
 
     <div class="sendBox">
       <div class="sendBox-input">
-        <label for="messageInput"></label>
         <input type="text" id="messageInput" v-model.trim="messageToSend"
-               v-on:keyup.enter="sendMessage">
-      </div>
-      <div>
+               v-on:keyup.enter="sendMessage" placeholder="Type a message...">
         <button @click="sendMessage">Send</button>
       </div>
 
@@ -169,7 +166,7 @@
     display: flex;
     flex-direction: column;
     padding: 5px;
-    height: 90%;
+    height: 98%;
     .header {
       flex: 1;
       text-align: center;
@@ -194,14 +191,21 @@
     }
 
     .sendBox {
-      flex: 2;
-      display: flex;
-      flex-direction: row;
-
       .sendBox-input {
-        margin-right: 5px;
+        display: flex;
+        flex-direction: row;
+        align-self: flex-end;
+        input{
+          flex: 6;
+          border-radius: 5px;
+          padding: 10px;
+          font-size: $fontSize;
+          background: $primaryBox;
+        }
+        button{
+          flex: 1;
+        }
       }
-
     }
   }
 </style>

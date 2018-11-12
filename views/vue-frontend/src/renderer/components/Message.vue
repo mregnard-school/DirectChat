@@ -53,31 +53,35 @@
     margin-bottom: 4px;
     display: block;
     .informational {
-      font-size: 12px;
+      font-size: 13px;
+      color: $secondaryText;;
     }
-
     .content {
       margin-bottom: 10px;
-
       .pseudo {
-        font-size: 12px;
-        margin-bottom: 3px;
+        font-size: 13px;
         padding-left: 4px;
+        margin-bottom: 4px;
         color: $secondaryText;
       }
       .message-content {
-        background: $accentColor;
-        border-radius: 5px;
+        background: $messagesOther;
+        border-radius: 7px;
         padding: 5px;
-        font-size: 14px;
+        font-size: 15px;
+        color: $primaryText;
+        font-weight: lighter;
         display: inline;
-
+      }
+      &.author {
+        .message-content {
+          background: $messages;
+          color: #FFFFFF;
+        }
+        text-align: right;
       }
     }
 
-    .author {
-      text-align: right;
-    }
 
   }
 </style>

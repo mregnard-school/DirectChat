@@ -1,8 +1,10 @@
-FROM rust:1.28.0
+FROM golang:1.11.2-alpine
 
-# Creating a directory to work from
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+# Install git & bash
+RUN apk update && apk add git bash gcc dpkg musl-dev
 
-# Build our app
-CMD ["cargo", "build"]
+COPY ./src $GOPATH/src/server
+
+WORKDIR  $GOPATH/src/server
+
+RUN go get -d -v

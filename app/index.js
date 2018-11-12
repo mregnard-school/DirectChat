@@ -1,1 +1,3 @@
-console.log("Hello world");
+const Client = require('client/client');
+
+exports.Client = Client;

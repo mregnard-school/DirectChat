@@ -28,11 +28,17 @@
 
       <div slot="body" class="add-input">
         <label for="adder">Pseudo</label>
-        <input type="text" v-model.trim="addFriend" id="adder" placeholder="Pseudo..." autofocus>
+        <input type="text"
+               v-model.trim="addFriend"
+               id="adder"
+               placeholder="Pseudo..."
+               autofocus
+               @keyup.enter="handleAddNewFriend"
+        >
       </div>
 
       <div slot="footer">
-        <button class="btn" @click.stop="handleAddNewFriend">
+        <button class="btn" @click.stop="handleAddNewFriend"  >
           OK
         </button>
       </div>
@@ -78,16 +84,18 @@
             pseudo: this.addFriend,
           }).then((response) => {
             let client = response.data;
-            let newFriendsId = client.friendships
-                .map((friendship) => {
-                  return friendship.friendId;
-                });
+            let oldFriendIds = this.friends.map((friend) => {
+              return friend.id;
+            });
+
+            console.log('old', oldFriendIds);
 
             client.friends
                 .filter(friend => {
-                  return newFriendsId.includes(friend.id);
+                  return !oldFriendIds.includes(friend.id);
                 })
                 .forEach(friend => {
+                  console.log('friend alledgly filtered', friend);
                   if(friend.ips && friend.ips.length > 0) {
                     this.$emit('new-connected', friend);
                   } else {

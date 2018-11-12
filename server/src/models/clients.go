@@ -222,5 +222,11 @@ func (client *Client) addFriendShip(friend *Client) {
 		ClientID: client.ID,
 		Accepted: true,
 	}
+	friendshipUpdate := &Friendship{
+		FriendID:client.ID,
+		ClientID:friend.ID,
+		Accepted:true,
+	}
+	GetDB().Save(&friendshipUpdate)
 	client.Friendships = append(client.Friendships, friendship)
 }

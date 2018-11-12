@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"server/models"
 	"testing"
@@ -130,6 +131,9 @@ func TestAddFriendApi(t *testing.T) {
 	compareClient(updateClientSent, updateClientReceived, t)
 
 	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)
+	client := &models.Client{}
+	models.GetDB().Table("clients").Where("id = ?", updateClientSent.ID).First(client)
+	log.Printf("password: %v", client.Password)
 }
 
 func TestLogoutApi(t *testing.T) {
@@ -143,6 +147,9 @@ func TestLogoutApi(t *testing.T) {
 	if !checkResponseCode(t, http.StatusOK, resp.Code) {
 		return
 	}
+	client := &models.Client{}
+	models.GetDB().Table("clients").Where("id = ?", updateClientSent.ID).First(client)
+	log.Printf("password: %v", client.Password)
 }
 
 func addSimpleClient(t *testing.T, ip string) *models.Client {

@@ -161,7 +161,7 @@ func (client *Client) Update() (*Client, error) {
 			return nil, err
 		}
 	}
-	error := GetDB().Save(&client).Error
+	error := GetDB().Omit("password").Save(&client).Error
 	return client, error
 }
 
@@ -209,23 +209,18 @@ func (client *Client) RegisterFriends() {
 }
 
 func (client *Client) addFriendShip(friend *Client) {
-	accepted := false
 	friendships, err := friend.getFriendship()
 	if err != nil {
 		log.Printf("Trouble in client::addFriendship: %v", err)
 	}
 	for i := 0; i < len(friendships); i++ {
-		if friendships[i].FriendID == client.ID {
-			accepted = true
-		}
 		friendshipUpdate := friendships[i]
-		friendshipUpdate.Accepted = accepted
 		GetDB().Save(&friendshipUpdate)
 	}
 	friendship := &Friendship{
 		FriendID: friend.ID,
 		ClientID: client.ID,
-		Accepted: accepted,
+		Accepted: true,
 	}
 	client.Friendships = append(client.Friendships, friendship)
 }

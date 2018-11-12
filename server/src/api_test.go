@@ -42,6 +42,7 @@ func TestRegisterClients(t *testing.T) {
 	}
 }
 
+
 func TestLoginExistingClient(t *testing.T) {
 	clearTables()
 	//@TODO change test cause we send the adress of ip
@@ -73,9 +74,10 @@ func TestLoginWrongCredential(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
 	resp := executeRequest(req)
 	checkResponseCode(t, http.StatusUnauthorized, resp.Code)
-	json.NewDecoder(resp.Body).Decode(client)
-	if client == nil {
-		t.Error("Client is null")
+	var received string
+	json.NewDecoder(resp.Body).Decode(received)
+	if received != "" {
+		t.Errorf("Client is not null:%v", received)
 		return
 	}
 }
@@ -122,6 +124,9 @@ func TestAddFriendApi(t *testing.T) {
 	}
 	updateClientReceived := &models.Client{}
 	json.NewDecoder(resp.Body).Decode(updateClientReceived)
+	test := &models.Client{}
+	models.GetDB().Table("clients").Where("id = ?", updateClientReceived).First(test)
+	updateClientSent.Password = test.Password
 	compareClient(updateClientSent, updateClientReceived, t)
 
 	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)

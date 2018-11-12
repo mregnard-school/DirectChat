@@ -1,7 +1,7 @@
 <template>
   <div class="friends">
     <div class="added">
-      <p>Friends :</p>
+      <h1>Friends</h1>
       <div v-for="friend in friends" class="friend-container">
         <div class="friend-info">
           {{friend.pseudo}}
@@ -118,21 +118,26 @@
       display: flex;
       padding-left: 10px;
       flex-direction: column;
+      h1 {
+        text-align: center;
+        font-size: 16px;
+      }
+
       .friend-container {
         display: flex;
         flex-direction: row;
+        align-items: center;
         .friend-info {
-          flex: 2;
-        }
-
-        .connected {
           flex: 1;
+        }
+        .connected {
 
+          flex: 1;
           .icon-container {
             .connected-icon {
               height: 10px;
               width: 10px;
-              background-color: lawngreen;
+              background-color: $accentColor;
               border-radius: 50%;
               display: inline-block;
             }

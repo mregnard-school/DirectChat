@@ -1,7 +1,7 @@
 <template>
   <div class="thumbnail">
     <div @click="select" class="thumbnail-info">
-      <div class="thumbnail-icon">
+      <div class="thumbnail-icon" :class="chatroom.id % 2 === 0 ? 'even' : ''">
         <div class="thumbnail-name">
           {{name}}
         </div>
@@ -104,6 +104,11 @@
       display: flex;
       flex-direction: row;
       .thumbnail-icon {
+
+        &.even {
+          background: $chatheadEven;
+        }
+
         $iconSize: 30px;
         background: $chathead;
         border-radius: 50%;

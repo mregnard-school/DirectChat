@@ -136,7 +136,6 @@
       },
       sendToAll(friends, message) {
         friends.forEach(friend => {
-          console.log(friend);
           if (friend.id !== this.client.id) {
             this.node.writeMessageTo(friend, message);
           }

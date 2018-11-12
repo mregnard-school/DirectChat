@@ -28,7 +28,13 @@
 
       <div slot="body" class="add-input">
         <label for="adder">Pseudo</label>
-        <input type="text" v-model.trim="addFriend" id="adder" placeholder="Pseudo..." autofocus>
+        <input type="text"
+               v-model.trim="addFriend"
+               id="adder"
+               placeholder="Pseudo..."
+               autofocus
+               @keyup.enter="handleAddNewFriend"
+        >
       </div>
 
       <div slot="footer">
@@ -45,6 +51,7 @@
   import Modal from 'components/Modal';
   import {http} from '@/axios-wrapper';
   import store from '@/mutableStore';
+
   export default {
     name: "FriendList",
     components: {
@@ -72,12 +79,26 @@
     },
     methods: {
       handleAddNewFriend() {
-        if(this.addFriend !== '') {
-          // TODO irindul 2018-11-08 : Test when backend has been updated
+        if (this.addFriend !== '') {
           http.post(`/clients/${this.clientId}/friends`, {
             pseudo: this.addFriend,
           }).then((response) => {
-            //todo push to store new pending request !
+            let client = response.data;
+            let oldFriendIds = this.friends.map((friend) => {
+              return friend.id;
+            });
+
+            client.friends
+                .filter(friend => {
+                  return !oldFriendIds.includes(friend.id);
+                })
+                .forEach(friend => {
+                  if (friend.ips && friend.ips.length > 0) {
+                    this.$emit('new-connected', friend);
+                  } else {
+                    this.$emit('new-disconnected', friend);
+                  }
+                })
           }).catch((error) => {
             console.log(error);
           });

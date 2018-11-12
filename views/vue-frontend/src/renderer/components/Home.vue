@@ -12,7 +12,9 @@
 
     <div class="dashboard">
       <chatroom-home class="chatrooms"/>
-      <friend-list/>
+      <friend-list @new-connected="onNewConnection"
+                   @new-disconnected="onEndConnection"
+      />
     </div>
 
   </div>
@@ -42,8 +44,12 @@
         }
       });
 
-      this.node.setOnNewConnection(this.onNewConnection);
-      this.node.setOnEndConnection(this.onEndConnection);
+      this.node.setOnNewConnection((socket) => {
+        this.onNewConnection(socket.client);
+      });
+      this.node.setOnEndConnection((socket) => {
+        this.onEndConnection(socket.client);
+      });
 
     },
     computed: {
@@ -58,27 +64,26 @@
       }
     },
     methods: {
-      onNewConnection(socket) {
-        socket.client.isConnected = true;
-        this.$store.commit('connectFriend', JSON.parse(JSON.stringify(socket.client)));
+      onNewConnection(client) {
+        client.isConnected = true;
+        this.$store.commit('connectFriend', JSON.parse(JSON.stringify(client)));
       },
-      onEndConnection(socket) {
-        socket.client.ips = [];
-        socket.client.isConnected = false;
-        this.$store.commit('disconnectFriend', JSON.parse(JSON.stringify(socket.client)));
+      onEndConnection(client) {
+        client.ips = [];
+        client.isConnected = false;
+        this.$store.commit('disconnectFriend', JSON.parse(JSON.stringify(client)));
       },
       disconnect() {
         this.$store.commit('removeFriends');
         this.$store.commit('removeToken');
         store.state.peer.node.closeServer();
         store.clean();
-        // TODO irindul 2018-11-10 : Call logout on server
-        http.put(`clients/${this.client.id}`)
+        http.put(`clients/${this.client.id}/logout`)
             .then((response) => {
-              console.log(response);
+
             })
             .catch((error) => {
-              console.log(error);
+
             });
       }
     }

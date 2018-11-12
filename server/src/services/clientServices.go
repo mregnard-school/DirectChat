@@ -12,10 +12,10 @@ import (
 )
 
 var defaultPort = 5000
+var WrongCredential = "Wrong Credential, you have to ask the right question"
 
 func Login(sentClient *models.Client) (*models.Client, int, string) {
 	pseudo := sentClient.Pseudo
-	password := sentClient.Password
 	var _ip string
 	if len(sentClient.Ips) > 0 {
 		_ip = sentClient.Ips[0].Address
@@ -41,9 +41,9 @@ func Login(sentClient *models.Client) (*models.Client, int, string) {
 		client.Ips = []*models.Ip{ip}
 	}
 	client.Update()
-	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(password))
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		return nil, http.StatusUnauthorized, "Wrong password"
+	err = bcrypt.CompareHashAndPassword([]byte(client.Password), []byte(sentClient.Password))
+	if err != nil || err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
+		return nil, http.StatusUnauthorized, WrongCredential
 	}
 	//Worked! Logged In
 	client.Password = ""

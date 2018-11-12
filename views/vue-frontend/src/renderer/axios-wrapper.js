@@ -1,8 +1,9 @@
 import axios from 'axios';
 import store from './store';
-
+import env from './env';
 class Wrapper {
   constructor() {
+    this.env = env;
     this.initService();
   }
   
@@ -10,7 +11,7 @@ class Wrapper {
     this.serviceAxios = axios.create({});
     this.serviceAxios.interceptors.request.use(
         config => {
-          config.baseURL = 'http://localhost:8000/api';// TODO irindul 2018-11-03 : Retrieve from env.js
+          config.baseURL = env.url;
           return config;
         },
         error => {
@@ -22,21 +23,6 @@ class Wrapper {
   
   setToken() {
     axios.defaults.headers.common['Authorization'] = `Bearer ${store.state.Auth.token}`;
-    /*this.serviceAxios.interceptors.request.use(
-        config => {
-          config.baseURL = 'http://localhost:8000/api'; // TODO irindul 2018-11-03 : Retrieve from env.js
-          const token = store.state.Auth.token;
-          if (token) {
-            config.headers.Authorization = 'Bearer ' + token;
-          }
-          config.headers.Samere = 'Swag';
-        
-          return config;
-        },
-        error => {
-          return Promise.reject(error);
-        }
-    );*/
   }
   
   handleError(error) {

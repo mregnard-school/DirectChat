@@ -5,6 +5,7 @@ class Wrapper {
   constructor() {
     this.env = env;
     this.initService();
+    console.log(env);
   }
   
   initService() {

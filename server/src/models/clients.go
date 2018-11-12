@@ -94,8 +94,11 @@ func GetClient(u uint) (*Client, error) {
 }
 
 func (client *Client) Logout() {
-	GetDB().Delete(client.Ips)
-	GetDB().Model(&client).Association("Ips").Clear()
+	//GetDB().Delete(client.Ips)
+	//GetDB().Model(&client).Association("Ips").Delete()
+	for i:=0; i < len(client.Ips); i ++ {
+		GetDB().Model(&client).Association("Ips").Delete(client.Ips[i])
+	}
 	client.Ips = []*Ip{}
 }
 

@@ -73,7 +73,6 @@
         this.selectedChatroom = wrapper;
       },
       isSelectedChatroom(chatroom) {
-        console.log(chatroom);
         const classes = "chatroom-thumbnail ";
         if(this.selectedChatroom) {
           if(this.selectedChatroom.conversation.id === chatroom.id) {

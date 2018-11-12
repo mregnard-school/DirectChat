@@ -70,7 +70,10 @@
       },
       hour() {
         let date = moment(this.message.date);
-        if(date.isBefore(moment())) {
+        let today = moment();
+        let diffDays = today.diff(date, 'days');
+
+        if(diffDays === 0) {
           return moment(date).format('HH:mm');
         } else {
           return moment(date).format('ddd');

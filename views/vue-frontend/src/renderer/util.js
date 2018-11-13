@@ -50,7 +50,6 @@ const peerCreated = (peer) => {
 const hashConversation = (friends) => {
   const pseudos = friends.map(friend => friend.pseudo).sort().join(",");
   const hash = sha256(pseudos);
-  console.log(hash);
   return hash;
 };
 

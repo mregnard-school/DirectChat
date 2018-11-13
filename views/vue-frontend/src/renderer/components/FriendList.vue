@@ -74,6 +74,9 @@
       },
       clientId() {
         return store.state.peer.client.id;
+      },
+      node() {
+        return store.state.peer.node;
       }
     },
     methods: {
@@ -92,8 +95,16 @@
                   return !oldFriendIds.includes(friend.id);
                 })
                 .forEach(friend => {
-                  if (friend.ips && friend.ips.length > 0) {
-                    this.$emit('new-connected', friend);
+
+                  if(friend.ips) {
+                    if(  friend.ips.length === 0) {
+                      this.$emit('new-disconnected', friend);
+                    } else {
+                      friend.ips.forEach(ipPort => {
+                        this.node.connectTo(ipPort.address, ipPort.port);
+                      });
+                      this.$emit('new-connected', friend);
+                    }
                   } else {
                     this.$emit('new-disconnected', friend);
                   }

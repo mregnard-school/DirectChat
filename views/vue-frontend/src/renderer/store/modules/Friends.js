@@ -9,12 +9,24 @@ const mutations = {
       return amigo.id !== friend.id
     });
     
-    state.connected.push(friend);
+    let fr = state.connected.find(connectedFr =>
+        connectedFr.id === friend.id);
+    if (!fr) {
+      state.connected.push(friend);
+    }
   },
   
   disconnectFriend(state, friend) {
     state.connected = state.connected.filter(amigo => amigo.id !== friend.id);
-    state.disconnected.push(friend);
+  
+  
+    let fr = state.disconnected.find(disconnectedFr =>
+        disconnectedFr.id === friend.id);
+    if (!fr) {
+      state.disconnected.push(friend);
+    }
+    
+    
   },
   removeFriends(state) {
     state.connected = [];
@@ -27,7 +39,8 @@ const getters = {};
 const actions = {
   isConnected: ({state}, friend) => {
     return new Promise((resolve) => {
-      resolve(state.connected.filter((amigo) => amigo.id === friend.id).length > 0);
+      resolve(
+          state.connected.filter((amigo) => amigo.id === friend.id).length > 0);
     });
   }
 };

@@ -25,7 +25,7 @@
     <div class="sendBox">
       <div class="sendBox-input">
         <input type="text" id="messageInput" v-model.trim="messageToSend"
-               v-on:keyup.enter="sendMessage" placeholder="Type a message...">
+               v-on:keyup.enter="sendMessage" placeholder="Type a message..." autofocus>
         <button @click="sendMessage">Send</button>
       </div>
 

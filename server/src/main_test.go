@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -61,6 +62,15 @@ func checkResponseCode(t *testing.T, expected int, actual int) bool {
 	return true
 }
 
+func checkResponse(t *testing.T, expected int, response *httptest.ResponseRecorder) bool {
+	if !(checkResponseCode(t, expected, response.Code)) {
+		t.Errorf("Error message %s", response.Header().Get("message"))
+		t.Errorf("Error status %s", response.Header().Get("status"))
+		return false
+	}
+	return true
+}
+
 func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	a.Router.ServeHTTP(rr, request)
@@ -90,7 +100,43 @@ func getSimpleClient() *models.Client{
 	NbClient ++
 	return client
 }
+func compareClientWithDb(t * testing.T, client *models.Client, password bool) {
+	if client == nil {
+		t.Error("The client is empty")
+	}
+	clientFromDB := &models.Client{}
+	err := models.GetDB().Table("clients").Where("id = ?", client.ID).First(clientFromDB).Error
+	if err != nil {
+		t.Errorf("Error getting the client:%d", client.ID)
+	}
+	if clientFromDB == nil {
+		t.Error("Client empty")
+		return
+	}
+	if clientFromDB.Pseudo != client.Pseudo {
+		t.Errorf("The pseudo expected was '%s', got '%s'", client.Pseudo, clientFromDB.Pseudo)
+	}
 
+	if lenCliDb:=len(clientFromDB.Ips); lenCliDb != len(client.Ips) {
+		t.Errorf("Not the same amount of ips. Expected : '%d', got: '%d", len(client.Ips), lenCliDb)
+		t.Errorf("for the client :%d", client.ID)
+		return
+	}
+	for i:=0; i < len(clientFromDB.Ips); i++ {
+		if tmp := clientFromDB.Ips[i].Address; tmp != client.Ips[i].Address {
+			t.Errorf("Not the same address at index %d. Expected: '%s', got '%s'", i, client.Ips[i].Address, tmp)
+		}
+	}
+	if !password {
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(clientFromDB.Password), []byte(client.Password))
+	if err != nil { //Password does not match!
+		t.Errorf("The password expected was '%s', got '%s'", clientFromDB.Password, client.Password)
+		t.Errorf("Error: %v", err)
+	}
+
+}
 func compareClient(client *models.Client, clientFromDB *models.Client, t *testing.T) {
 	if clientFromDB == nil {
 		t.Error("Client empty")

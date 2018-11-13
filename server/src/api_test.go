@@ -124,12 +124,13 @@ func TestAddFriendApi(t *testing.T) {
 	updateClientReceived := &models.Client{}
 	json.NewDecoder(resp.Body).Decode(updateClientReceived)
 	test := &models.Client{}
-	models.GetDB().Table("clients").Where("id = ?", updateClientReceived).First(test)
+	models.GetDB().Table("clients").Where("id = ?", updateClientReceived.ID).First(test)
 	updateClientSent.Password = test.Password
 	compareClient(updateClientSent, updateClientReceived, t)
 	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)
 	client := &models.Client{}
-	models.GetDB().Table("clients").Where("id = ?", updateClientSent.ID).First(client)
+	id := updateClientSent.ID
+	models.GetDB().Table("clients").Where("id = ?", int(id)).First(client)
 }
 
 func TestLogoutApi(t *testing.T) {
@@ -164,7 +165,7 @@ func useClient(t *testing.T, client *models.Client, ip string) *models.Client {
 	req, _ := http.NewRequest("POST", "/api/clients/login", clientToBuffer(t, c))
 	req.RemoteAddr = ip
 	resp := executeRequest(req)
-	checkResponseCode(t, http.StatusOK, resp.Code)
+	checkResponse(t, http.StatusOK, resp)
 	json.NewDecoder(resp.Body).Decode(client)
 	if client == nil {
 		t.Error("Client is null")

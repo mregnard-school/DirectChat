@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"log"
 	"server/models"
 	u "server/utils"
 	"net/http"
@@ -51,6 +52,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		})
 
 		if err != nil { //Malformed token, returns with http code 403 as usual
+			log.Print("Unathorized =Wrong Formatting")
 			response = u.Message(false, "Malformed authentication token", http.StatusForbidden)
 			u.Respond(w, response)
 			return

@@ -42,7 +42,6 @@ func (client *Client) GetId() int {
 }
 
 func (client *Client) Create() (*Client, error) {
-
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)
 	client.RegisterFriends()
@@ -159,8 +158,17 @@ func (client *Client) Update() (*Client, error) {
 			return nil, err
 		}
 	}
-	error := GetDB().Omit("password").Save(&client).Error
-	return client, error
+	var e error
+	c := &Client{}
+	GetDB().Table("clients").Where("id = ?", client.ID).First(c)
+	if client.Password != "" && c.Password != client.Password {
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
+		client.Password = string(hashedPassword)
+		e = GetDB().Save(&client).Error
+	} else {
+		e = GetDB().Omit("password").Save(&client).Error
+	}
+	return client, e
 }
 
 func (client *Client) removeIps() error {

@@ -61,8 +61,8 @@
       },
       chatroomName() {
         const name =  this.chatroom.name;
-        return name.length > 10 ?
-            name.substring(0, 10) + '...'
+        return name.length > 7 ?
+            name.substring(0, 7) + '...'
             : name;
       },
       name() {
@@ -136,7 +136,7 @@
 
           min-width: 100%;
           .chatroom-name {
-            flex: 1;
+           // flex: 1;
             font-weight: 600;
             font-size: 16px;
             text-align: left;

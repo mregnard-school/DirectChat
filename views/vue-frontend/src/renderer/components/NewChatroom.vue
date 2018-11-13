@@ -57,6 +57,7 @@
     methods: {
       submit() {
         this.$emit('new-chatroom', this.friendSelected);
+        this.tags = [];
       }
     }
   }

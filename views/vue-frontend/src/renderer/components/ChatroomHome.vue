@@ -42,6 +42,7 @@
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';
   import types from '@/messageTypes';
+  import {hashConversation} from "@/util";
 
   const localStore = new Store();
 
@@ -113,6 +114,7 @@
         let friends = this.peer.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
           let friendsAndMe = friends.concat([this.client]);
+
           const messageTempalte = {
             id: 0,
             conversation: {id: 0, name: "", friends: friendsAndMe,},
@@ -124,9 +126,11 @@
             }
           };
 
-          this.createAndSendChatroomCreationMessage(messageTempalte, friends, this.client.pseudo);
-          const name = pseudos.join(", ");
-          const messageForMyself = this.createMessage(messageTempalte, name);
+          const multiName = friendsAndMe.map(fr => fr.pseudo).sort().join(", ");
+          const name = friends.length > 1 ? multiName : this.client.pseudo;
+          const myName = friends.length > 1 ? multiName : pseudos[0];
+          this.createAndSendChatroomCreationMessage(messageTempalte, friends, name);
+          const messageForMyself = this.createMessage(messageTempalte, myName);
 
           const conversation = this.createConversationWithWrapper(messageForMyself, true);
           this.setLastMessage(conversation, messageForMyself);
@@ -153,8 +157,10 @@
         });
       },
       createConversation(message) {
+        const hash = hashConversation(message.conversation.friends);
+
         const conversation = {
-          'id': this.chatrooms.length + 1,
+          'id': hash,
           'name': message.conversation.name,
           'friends': message.conversation.friends || [],
           'messages': [],

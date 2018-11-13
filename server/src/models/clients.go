@@ -94,12 +94,7 @@ func GetClient(u uint) (*Client, error) {
 }
 
 func (client *Client) Logout() {
-	//GetDB().Delete(client.Ips)
-	//GetDB().Model(&client).Association("Ips").Delete()
-	for i:=0; i < len(client.Ips); i ++ {
-		GetDB().Model(&client).Association("Ips").Delete(client.Ips[i])
-	}
-	client.Ips = []*Ip{}
+	client.removeIps() //@TODO add received messages offline
 }
 
 func (client *Client) getFriendship() ([]*Friendship, error) {
@@ -166,6 +161,14 @@ func (client *Client) Update() (*Client, error) {
 	}
 	error := GetDB().Omit("password").Save(&client).Error
 	return client, error
+}
+
+func (client *Client) removeIps() error {
+	for i:= 0; i < len(client.Ips); i ++ {
+		client.Ips[i].Delete()
+	}
+	return GetDB().Model(&client).Association("Ips").Replace(client.Ips).Error
+
 }
 
 func (client *Client) Delete() map[string]interface{} {

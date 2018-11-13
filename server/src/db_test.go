@@ -255,11 +255,18 @@ func TestGetClientByPseudo(t *testing.T) {
 func TestLogout(t *testing.T) {
 	clearTables()
 	client := getClientWithIp()
+	client2 := getClientWithIp()
 	_, err := client.Create()
 	if err != nil {
 		t.Errorf("Error when creating client: '%s'", err)
 	}
+	_, err = client2.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	oldIps := client.Ips
 	client.Logout()
+	client.Ips = []*models.Ip{}
 	clientFromDb, _ := models.GetClient(1)
 	if len(clientFromDb.Ips) != 0 {
 		log.Printf("client ips length is %d", len(clientFromDb.Ips))
@@ -271,10 +278,15 @@ func TestLogout(t *testing.T) {
 	compareClient(client, clientFromDb, t)
 	var ips []models.Ip
 	models.GetDB().Find(&ips)
-	if len(ips) != 0 {
+	for i:= 0; i < len(ips); i++ {
+		for j:=0; j<len(oldIps); j++{
+			if ips[i].ID == oldIps[j].ID {
+				t.Errorf("this ip should be deleted: %v", ips[i])
+			}
+		}
+	}
+	if len(ips) != len(client2.Ips) {
 		t.Errorf("There are still %d ips", len(ips))
 		t.Errorf("ips: %v", ips)
 	}
-	//log.Printf("ips:%v", ips)
-
 }

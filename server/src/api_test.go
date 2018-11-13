@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"server/models"
 	"testing"
@@ -87,13 +86,12 @@ func TestLoginWrongCredential(t *testing.T) {
 //	clearTables()
 //	updateClientSent := addSimpleClient(t, "localhost")
 //	friend := addSimpleClient(t, "friend_ip")
-//	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
 //	var bearer = "Bearer " + updateClientSent.Token
 //	updateClientSent.Friends = []*models.Client{
 //		friend,
 //	}
 //	updateClientSent.Pseudo = "update_pseudo"
-//	req, _ := http.NewRequest("POST", "/api/clients/1/friends", clientToBuffer(t, friend))
+//	req, _ := http.NewRequest("PUT", "/api/clients/1/friends", clientToBuffer(t, friend))
 //	req.Header.Add("Authorization", bearer)
 //	resp := executeRequest(req)
 //	if !checkResponseCode(t, http.StatusOK, resp.Code){
@@ -105,6 +103,7 @@ func TestLoginWrongCredential(t *testing.T) {
 //	compareClient(updateClientSent, updateClientReceived, t)
 //	compareClientWithFriends(1, updateClientReceived, updateClientSent.Friends, t)
 //}
+
 func TestAddFriendApi(t *testing.T) {
 	clearTables()
 	updateClientSent := addSimpleClient(t, "localhost")
@@ -112,7 +111,6 @@ func TestAddFriendApi(t *testing.T) {
 	friend = &models.Client{
 		Pseudo: friend.Pseudo,
 	}
-	updateClientSent = useClient(t, updateClientSent, updateClientSent.Ips[0].Address)
 	updateClientSent.Friends = []*models.Client{
 		friend,
 	}
@@ -129,11 +127,9 @@ func TestAddFriendApi(t *testing.T) {
 	models.GetDB().Table("clients").Where("id = ?", updateClientReceived).First(test)
 	updateClientSent.Password = test.Password
 	compareClient(updateClientSent, updateClientReceived, t)
-
 	compareClientWithFriends(int(updateClientReceived.ID), updateClientReceived, updateClientReceived.Friends, t)
 	client := &models.Client{}
 	models.GetDB().Table("clients").Where("id = ?", updateClientSent.ID).First(client)
-	log.Printf("password: %v", client.Password)
 }
 
 func TestLogoutApi(t *testing.T) {
@@ -149,7 +145,6 @@ func TestLogoutApi(t *testing.T) {
 	}
 	client := &models.Client{}
 	models.GetDB().Table("clients").Where("id = ?", updateClientSent.ID).First(client)
-	log.Printf("password: %v", client.Password)
 }
 
 func addSimpleClient(t *testing.T, ip string) *models.Client {

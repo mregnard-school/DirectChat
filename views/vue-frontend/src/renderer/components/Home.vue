@@ -36,6 +36,9 @@
   import FriendList from 'components/FriendList';
   import store from '@/mutableStore';
   import {http} from '@/axios-wrapper';
+  import {logout} from '@/util';
+  import {remote, ipcRenderer} from 'electron';
+
 
   export default {
     name: "Home",
@@ -61,6 +64,10 @@
         this.onEndConnection(socket.client);
       });
 
+      remote.getCurrentWindow().on('close', () => {
+        this.disconnect();
+      });
+
     },
     computed: {
       friends() {
@@ -84,17 +91,7 @@
         this.$store.commit('disconnectFriend', JSON.parse(JSON.stringify(client)));
       },
       disconnect() {
-        this.$store.commit('removeFriends');
-        this.$store.commit('removeToken');
-        store.state.peer.node.closeServer();
-        store.clean();
-        http.put(`clients/${this.client.id}/logout`)
-            .then((response) => {
-
-            })
-            .catch((error) => {
-
-            });
+        logout();
       }
     }
   }

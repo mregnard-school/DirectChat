@@ -94,7 +94,7 @@
       }
 
       .item.valid.selected-item {
-        background-color: $primaryLightColor;
+        background-color: $accentColor;
       }
 
       .tag {

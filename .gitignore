@@ -64,6 +64,9 @@ typings/
 # next.js build output
 .next
 
+build/
+.DS_STORE
+
 #Rust
 server/registy/
 server/target/

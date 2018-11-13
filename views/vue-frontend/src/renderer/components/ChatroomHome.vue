@@ -5,10 +5,11 @@
       <div class="chatrooms-search">
         <input type="text" v-model="filter" placeholder="Search...">
       </div>
-      <div v-for="chatroom in conversations">
+      <div v-for="(chatroom, index) in conversations">
         <chatroom-thumbnail
                             :class="isSelectedChatroom(chatroom)"
                             :chatroom="chatroom"
+                            :index="index"
                             @select-chatroom="changeChatroom"
         />
       </div>
@@ -42,6 +43,8 @@
   import Client from 'p2p/client/client';
   import {HashTable} from 'p2p/services/util';
   import types from '@/messageTypes';
+  import {hashConversation} from "@/util";
+  import moment from 'moment';
 
   const localStore = new Store();
 
@@ -85,6 +88,13 @@
       setLastMessage(chatroom, message) {
         this.conversations.filter(chtroom => chtroom.id === chatroom.id)
             .forEach(chat => chat.last_message = message);
+
+        this.chatrooms = this.chatrooms.sort((wrapper1, wrapper2) => {
+          const date_conv1 = moment(wrapper1.conversation.last_message.date);
+          const date_conv2 = moment(wrapper2.conversation.last_message.date);
+          return date_conv2.diff(date_conv1);
+        });
+
       },
       removeChatroom(chatroom) {
         for (let i = 0; i < this.chatrooms.length; i++) {
@@ -113,6 +123,7 @@
         let friends = this.peer.getFriendsWithPseudos(pseudos);
         if (friends.length > 0) {
           let friendsAndMe = friends.concat([this.client]);
+
           const messageTempalte = {
             id: 0,
             conversation: {id: 0, name: "", friends: friendsAndMe,},
@@ -124,9 +135,11 @@
             }
           };
 
-          this.createAndSendChatroomCreationMessage(messageTempalte, friends, this.client.pseudo);
-          const name = pseudos.join(", ");
-          const messageForMyself = this.createMessage(messageTempalte, name);
+          const multiName = friendsAndMe.map(fr => fr.pseudo).sort().join(", ");
+          const name = friends.length > 1 ? multiName : this.client.pseudo;
+          const myName = friends.length > 1 ? multiName : pseudos[0];
+          this.createAndSendChatroomCreationMessage(messageTempalte, friends, name);
+          const messageForMyself = this.createMessage(messageTempalte, myName);
 
           const conversation = this.createConversationWithWrapper(messageForMyself, true);
           this.setLastMessage(conversation, messageForMyself);
@@ -153,8 +166,10 @@
         });
       },
       createConversation(message) {
+        const hash = hashConversation(message.conversation.friends);
+
         const conversation = {
-          'id': this.chatrooms.length + 1,
+          'id': hash,
           'name': message.conversation.name,
           'friends': message.conversation.friends || [],
           'messages': [],
@@ -171,7 +186,7 @@
           component: Chatroom,
         };
 
-        this.chatrooms.push(conversationWrapper);
+        this.chatrooms.unshift(conversationWrapper);
         if (setCurrent) {
           this.selectedChatroom = conversationWrapper;
         }
@@ -186,7 +201,7 @@
           conversation = this.createConversationWithWrapper(message);
         }
 
-        conversation.last_message = message;
+        this.setLastMessage(conversation, message);
         if (this.selectedChatroom && this.selectedChatroom.conversation) {
           if (conversation.id !== this.selectedChatroom.conversation.id) {
             conversation.read = false;

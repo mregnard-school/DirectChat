@@ -49,3 +49,8 @@ func GetIp(u uint) *Ip {
 	}
 	return address
 }
+
+func (ip *Ip) Delete() error {
+	err := GetDB().Delete(&ip).Error
+	return err
+}

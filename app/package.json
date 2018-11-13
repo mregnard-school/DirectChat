@@ -1,5 +1,5 @@
 {
-  "name": "p2p-app",
+  "name": "DirectChat",
   "version": "1.0.0",
   "description": "Simple p2p app for messaging",
   "main": "index.js",

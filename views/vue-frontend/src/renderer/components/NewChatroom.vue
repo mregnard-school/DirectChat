@@ -57,6 +57,7 @@
     methods: {
       submit() {
         this.$emit('new-chatroom', this.friendSelected);
+        this.tags = [];
       }
     }
   }
@@ -94,7 +95,7 @@
       }
 
       .item.valid.selected-item {
-        background-color: $primaryLightColor;
+        background-color: $accentColor;
       }
 
       .tag {

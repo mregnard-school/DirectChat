@@ -148,24 +148,43 @@ func TestCreateClientWithFriends(t *testing.T) {
 	compareClient2Friends(client, t, f_friend, s_friend)
 }
 
-//func TestUpdateSimpleClient(t *testing.T) {
-//	clearTable("clients")
-//	client := getSimpleClient()
-//	_, err := client.Create()
-//	if err != nil {
-//		t.Errorf("Error when creating client: '%s'", err)
-//	}
-//	client.Pseudo = "updatePseudo"
-//	client.Update()
-//	clients := []models.Client{}
-//	models.GetDB().Find(&clients)
-//	if l := len(clients); l != 1 {
-//		t.Errorf("Expected 1 client, got '%d'", l)
-//		return
-//	}
-//	clientFromDB := &clients[0]
-//	compareClient(client, clientFromDB, t)
-//}
+func TestUpdatePseudo(t *testing.T) {
+	clearTable("clients")
+	client := getSimpleClient()
+	_, err := client.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	client.Pseudo = "updatePseudo"
+	client.Update()
+	var clients []models.Client
+	models.GetDB().Find(&clients)
+	if l := len(clients); l != 1 {
+		t.Errorf("Expected 1 client, got '%d'", l)
+		return
+	}
+	clientFromDB := &clients[0]
+	compareClient(client, clientFromDB, t)
+}
+
+func TestUpdatePassword(t *testing.T) {
+	clearTable("clients")
+	client := getSimpleClient()
+	_, err := client.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	client.Password = "updatePassword"
+	client.Update()
+	var clients []models.Client
+	models.GetDB().Find(&clients)
+	if l := len(clients); l != 1 {
+		t.Errorf("Expected 1 client, got '%d'", l)
+		return
+	}
+	client.Password = "updatePassword"
+	compareClientWithDb(t, client, true)
+}
 
 func TestUpdateClientWithIp(t *testing.T) {
 	clearTables()
@@ -174,11 +193,12 @@ func TestUpdateClientWithIp(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error when creating client: '%s'", err)
 	}
-	client.Pseudo = "updatePseudo"
-	ip2 := getSimpleIp("new addresss")
+	ip1 := getSimpleIp("updatedress1")
+	ip2 := getSimpleIp("updatedress2")
+	client.Ips[0] = ip1
 	client.Ips[1] = ip2
 	client.Update()
-	clients := []models.Client{}
+	var clients []models.Client
 	models.GetDB().Find(&clients)
 	if l := len(clients); l != 1 {
 		t.Errorf("Expected 1 client, got '%d'", l)
@@ -186,6 +206,28 @@ func TestUpdateClientWithIp(t *testing.T) {
 	}
 	clientFromDB, _ := models.GetClient(1)
 	compareClient(client, clientFromDB, t)
+}
+func TestUpdateClientFriends(t *testing.T) {
+	clearTables()
+	client := getSimpleClient()
+	friend := getSimpleClient()				//This is the initial friend we have
+	friend.Create()
+	client.Friends = []*models.Client{
+		friend,
+	}
+	_, err := client.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	newFriend := getSimpleClient()			//Now the client is created, we replace our friend
+	newFriend.Create()
+	client.Friends = []*models.Client{
+		newFriend,
+	}
+	client.Update()
+	var clients []models.Client
+	models.GetDB().Find(&clients)
+	compareClientWithDb(t, client, false)
 }
 
 func TestUpdateComplexFriend(t *testing.T) {
@@ -214,7 +256,7 @@ func TestAddFriend(t *testing.T) {
 	}
 	friends = append(friends, newFriend)
 	compareClientWithFriends(4, client, friends, t)
-	//for i := 0; i < len(client.Friendships); i++ {
+	//for i := 0; i < len(client.Friendships); i++ {	//Remove because we need friends so it's accecpted right away
 	//	if client.Friendships[i].Accepted {
 	//		t.Errorf("This friendship %v with the friend %v is not supposed to be accepted for this client : %v", client.Friendships[i], client.Friends[i], client)
 	//	}
@@ -255,11 +297,18 @@ func TestGetClientByPseudo(t *testing.T) {
 func TestLogout(t *testing.T) {
 	clearTables()
 	client := getClientWithIp()
+	client2 := getClientWithIp()
 	_, err := client.Create()
 	if err != nil {
 		t.Errorf("Error when creating client: '%s'", err)
 	}
+	_, err = client2.Create()
+	if err != nil {
+		t.Errorf("Error when creating client: '%s'", err)
+	}
+	oldIps := client.Ips
 	client.Logout()
+	client.Ips = []*models.Ip{}
 	clientFromDb, _ := models.GetClient(1)
 	if len(clientFromDb.Ips) != 0 {
 		log.Printf("client ips length is %d", len(clientFromDb.Ips))
@@ -271,10 +320,15 @@ func TestLogout(t *testing.T) {
 	compareClient(client, clientFromDb, t)
 	var ips []models.Ip
 	models.GetDB().Find(&ips)
-	if len(ips) != 0 {
+	for i:= 0; i < len(ips); i++ {
+		for j:=0; j<len(oldIps); j++{
+			if ips[i].ID == oldIps[j].ID {
+				t.Errorf("this ip should be deleted: %v", ips[i])
+			}
+		}
+	}
+	if len(ips) != len(client2.Ips) {
 		t.Errorf("There are still %d ips", len(ips))
 		t.Errorf("ips: %v", ips)
 	}
-	//log.Printf("ips:%v", ips)
-
 }

@@ -3,7 +3,8 @@ import router from './router';
 import mutStore from './mutableStore';
 import {parseIpAndPortFromString} from 'p2p/services/util';
 import Client from 'p2p/client/client';
-import {wrapper} from "./axios-wrapper";
+import {wrapper, http} from "./axios-wrapper";
+import { sha256 } from 'js-sha256';
 
 const ifs = require('os').networkInterfaces();
 const result = Object.keys(ifs)
@@ -46,4 +47,19 @@ const peerCreated = (peer) => {
   });
 };
 
-export {ip, userAuthed};
+const hashConversation = (friends) => {
+  const pseudos = friends.map(friend => friend.pseudo).sort().join(",");
+  const hash = sha256(pseudos);
+  return hash;
+};
+
+const logout = () => {
+  store.commit('removeFriends');
+  store.commit('removeToken');
+  mutStore.state.peer.node.closeServer();
+  const client = mutStore.state.peer.client;
+  mutStore.clean();
+  return http.put(`clients/${client.id}/logout`);
+};
+
+export {ip, userAuthed, hashConversation, logout};

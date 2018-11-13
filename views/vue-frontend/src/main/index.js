@@ -1,5 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 
+//import {logout} from "../renderer/util";
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -20,14 +22,15 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 563,
     useContentSize: true,
-    width: 1000
-  })
+    width: 1000,
+    title: "DirectChat",
+  });
 
   mainWindow.loadURL(winURL)
-
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  
+  mainWindow.on('close', () => {
+    mainWindow = null;
+  });
   
   if (process.env.NODE_ENV !== 'production') {
     require('vue-devtools').install()

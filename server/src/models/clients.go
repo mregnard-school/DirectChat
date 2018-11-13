@@ -172,11 +172,15 @@ func (client *Client) Update() (*Client, error) {
 }
 
 func (client *Client) removeIps() error {
-	for i:= 0; i < len(client.Ips); i ++ {
-		client.Ips[i].Delete()
+	oldIps := client.Ips
+	err := GetDB().Model(&client).Association("Ips").Clear().Error
+	if err != nil {
+		return err
 	}
-	return GetDB().Model(&client).Association("Ips").Replace(client.Ips).Error
-
+	for i := 0; i < len(oldIps); i++ {
+		oldIps[i].Delete()
+	}
+	return err
 }
 
 func (client *Client) Delete() map[string]interface{} {

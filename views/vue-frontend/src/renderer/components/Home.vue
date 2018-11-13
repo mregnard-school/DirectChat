@@ -84,6 +84,12 @@
       onNewConnection(client) {
         client.isConnected = true;
         this.$store.commit('connectFriend', JSON.parse(JSON.stringify(client)));
+        let fr = this.client.friends.find((friend) => friend.id === client.id);
+        if(!fr) {
+
+          this.client.friends.push(client);
+        }
+
       },
       onEndConnection(client) {
         client.ips = [];

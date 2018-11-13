@@ -42,7 +42,6 @@ func (client *Client) GetId() int {
 }
 
 func (client *Client) Create() (*Client, error) {
-
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
 	client.Password = string(hashedPassword)
 	client.RegisterFriends()
@@ -94,12 +93,7 @@ func GetClient(u uint) (*Client, error) {
 }
 
 func (client *Client) Logout() {
-	//GetDB().Delete(client.Ips)
-	//GetDB().Model(&client).Association("Ips").Delete()
-	for i:=0; i < len(client.Ips); i ++ {
-		GetDB().Model(&client).Association("Ips").Delete(client.Ips[i])
-	}
-	client.Ips = []*Ip{}
+	client.removeIps() //@TODO add received messages offline
 }
 
 func (client *Client) getFriendship() ([]*Friendship, error) {
@@ -164,8 +158,29 @@ func (client *Client) Update() (*Client, error) {
 			return nil, err
 		}
 	}
-	error := GetDB().Omit("password").Save(&client).Error
-	return client, error
+	var e error
+	c := &Client{}
+	GetDB().Table("clients").Where("id = ?", client.ID).First(c)
+	if client.Password != "" && c.Password != client.Password {
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(client.Password), bcrypt.DefaultCost)
+		client.Password = string(hashedPassword)
+		e = GetDB().Save(&client).Error
+	} else {
+		e = GetDB().Omit("password").Save(&client).Error
+	}
+	return client, e
+}
+
+func (client *Client) removeIps() error {
+	oldIps := client.Ips
+	err := GetDB().Model(&client).Association("Ips").Clear().Error
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(oldIps); i++ {
+		oldIps[i].Delete()
+	}
+	return err
 }
 
 func (client *Client) Delete() map[string]interface{} {

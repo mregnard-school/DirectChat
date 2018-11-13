@@ -36,7 +36,6 @@ var CreateClient = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
-
 	client := &models.Client{}
 	err := json.NewDecoder(r.Body).Decode(client) //decode the request body into struct and failed if any error occur
 	if err != nil {

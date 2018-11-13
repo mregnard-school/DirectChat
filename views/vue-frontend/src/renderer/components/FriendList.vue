@@ -97,7 +97,7 @@
                 .forEach(friend => {
 
                   if(friend.ips) {
-                    if(  friend.ips.length === 0) {
+                    if(friend.ips.length === 0) {
                       this.$emit('new-disconnected', friend);
                     } else {
                       friend.ips.forEach(ipPort => {
@@ -108,11 +108,18 @@
                   } else {
                     this.$emit('new-disconnected', friend);
                   }
-                })
+
+                  let inListFriend = store.state.peer.client.friends.find((amigo) => amigo.id === friend.id);
+                  if(!inListFriend) {
+                    store.state.peer.client.friends.push(friend);
+                  }
+                });
+
           }).catch((error) => {
             console.log(error);
           });
 
+          this.addFriend= '';
           this.showModal = false;
         }
       },

@@ -91,6 +91,7 @@
             };
             message.conversation.name = this.name;
             this.conversation.name = this.name;
+            this.$emit('last-message', this.conversation, message);
             this.writeMessageToAll(message);
           }
         }

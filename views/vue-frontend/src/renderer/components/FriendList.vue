@@ -119,6 +119,7 @@
             console.log(error);
           });
 
+          this.addFriend= '';
           this.showModal = false;
         }
       },

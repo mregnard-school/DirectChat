@@ -22,16 +22,15 @@
 
     <modal v-if="showModal" @close="showModal = false">
       <div slot="header">
-        <h3>Enter your friend's pseudo : </h3>
+        <h3>Add a new friend ! </h3>
       </div>
 
 
       <div slot="body" class="add-input">
-        <label for="adder">Pseudo</label>
         <input type="text"
                v-model.trim="addFriend"
                id="adder"
-               placeholder="Pseudo..."
+               placeholder="Pseudo"
                autofocus
                @keyup.enter="handleAddNewFriend"
         >
@@ -177,23 +176,39 @@
       margin: 0px auto;
       padding: 20px 30px;
       background-color: #fff;
-      border-radius: 2px;
+      border-radius: 5px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
       transition: all .3s ease;
       font-family: Helvetica, Arial, sans-serif;
     }
 
-    .modal-header h3 {
-      margin-top: 0;
-      color: #42b983;
+    .modal-header {
+      h3 {
+        margin-top: 0;
+        color: $accentColor;
+      }
+
     }
 
     .modal-body {
-      margin: 20px 0;
+      padding-left: auto;
+      padding-right: auto;
+      input {
+        font-size: $fontSize;;
+        max-width: 300px;
+        min-height: 25px;
+        padding: 10px;
+        border-radius: 3px;
+        border: 1px solid $dividerColor;
+      }
+    }
+
+    .modal-footer {
+      float: right;
     }
 
     .modal-default-button {
-      float: right;
+      //float: right;
     }
 
     /*

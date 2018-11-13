@@ -5,10 +5,11 @@
       <div class="chatrooms-search">
         <input type="text" v-model="filter" placeholder="Search...">
       </div>
-      <div v-for="chatroom in conversations">
+      <div v-for="(chatroom, index) in conversations">
         <chatroom-thumbnail
                             :class="isSelectedChatroom(chatroom)"
                             :chatroom="chatroom"
+                            :index="index"
                             @select-chatroom="changeChatroom"
         />
       </div>
